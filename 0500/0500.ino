@@ -166,7 +166,7 @@ void setup() {
 	//REINICIO_CENTRAL = EEPROM.read(MEM_EEPROM_C);
 	Serial.println("----------------------------------");
 	Serial.println(" *Configurações da Central:");
-	Serial.println("  IP da Central: " + ipLocalString);
+	Serial.println(" IP da Central: " + ipLocalString);
 	//---------------------------------------
 	// PARAMETROS DA MEMORIA EEPROM
 	//---------------------------------------
@@ -226,7 +226,7 @@ void loop() {
 		gravaLog(" "+hora_ntp + " - Configurações da Central ", logtxt, 2);
 		servidor 			= root["servidor"];
 		serv = String(servidor);
-		gravaLog(" "+hora_ntp + " - Servidor Banco de dados:	 "+String(servidor), logtxt, 2);
+		gravaLog(" "+hora_ntp + " Servidor Banco de dados:	 "+String(servidor), logtxt, 2);
 
 		botao1.nomeInter 	= root["int_1"];    //Serial.print(" *Input 1: " + String(botao1.nomeInter));
 		botao1.tipo 		= root["tipo_1"];    	//Serial.print(" tipo: " + String(botao1.tipo));

@@ -98,7 +98,7 @@ const char* abreJson(const char* json, const char* etiqueta  )
 
 void gravaLog(String mensagem, String permissao, int nivel)
 {
-	Serial.println(mensagem);
+	//Serial.println(mensagem);
 	for(int i = 0; i <=0 ;i++ )
 	{
 		if (logtxt == "sim")

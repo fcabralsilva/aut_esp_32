@@ -49,17 +49,17 @@ void portaIO(int entrada, int rele, const char* tipo,const char* modelo,char con
 		if (nContar >= 100)
 		{
 			
-		if(n == 0)
-		{
-			for(int i = 0; i <=0 ;i++ )
+			if(n == 0)
 			{
-				String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
-				//Gravando log de erro na central.
-				if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
-				n = 1;
+				for(int i = 0; i <=0 ;i++ )
+				{
+					String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
+					//Gravando log de erro na central.
+					if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
+					n = 1;
+				}
 			}
-		}
-	} else
+		} else
 		{
 			String ERRO_ENTRADA = "0";
 			nContar = 0;
@@ -81,19 +81,19 @@ void portaIO(int entrada, int rele, const char* tipo,const char* modelo,char con
 
 const char* abreJson(const char* json, const char* etiqueta  )
 {
-  DynamicJsonDocument doc;
-  const char* servidor;
-  DeserializationError error = deserializeJson(doc, json);
-  if (error)
-  {
-    Serial.print(F(" ERRO 0101 - Falha ao desenraizar o arquivo json: "));
-    Serial.println(error.c_str());
-  
-  }
-  JsonObject root = doc.as<JsonObject>();
-  servidor       = root[etiqueta];
-  root.end();
-  return servidor;
+	DynamicJsonDocument doc;
+	const char* servidor;
+	DeserializationError error = deserializeJson(doc, json);
+	if (error)
+	{
+		Serial.print(F(" ERRO 0101 - Falha ao desenraizar o arquivo json: "));
+		Serial.println(error.c_str());
+		
+	}
+	JsonObject root = doc.as<JsonObject>();
+	servidor       = root[etiqueta];
+	root.end();
+	return servidor;
 }
 
 void gravaLog(String mensagem, String permissao, int nivel)
@@ -124,10 +124,10 @@ String selectedHTNL(const char* tipo, String comp )
 }
 
 void ajustaHora( int ano, int mes, int dia, int hora, int minuto ){
-    Serial.println(" Corrigindo data e hora...");
-    rtc.adjust(DateTime(ano, mes, dia, hora, minuto, 0));
-  }
-  
+	Serial.println(" Corrigindo data e hora...");
+	rtc.adjust(DateTime(ano, mes, dia, hora, minuto, 0));
+}
+
 String quebraString(String txtMsg,String string)
 { 
 	unsigned int tamanho = txtMsg.length();
@@ -137,7 +137,7 @@ String quebraString(String txtMsg,String string)
 	//Serial.println(resultado);
 	return resultado;
 } 
-  
+
 void forceUpdate(void) 
 {
 	timeClient.forceUpdate();
@@ -160,19 +160,19 @@ void checkOST()
 //    GPIO
 //---------------------------------------  
 void acionaPorta(int numeroF, String portaF, String acaoF) {
-  Serial.println(" Comando:"+String(numeroF)+"/"+acaoF);
+	Serial.println(" Comando:"+String(numeroF)+"/"+acaoF);
 	if (acaoF == "liga") {
 		digitalWrite(numeroF, HIGH );
 		linha = "porta="+String(numeroF)+"&acao=liga&central="+ipLocalString;
 		gravarBanco(linha);
-		gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
+		//gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
 		linha = "";
 		
 	}else if (acaoF == "desl") {
 		digitalWrite(numeroF, LOW);
 		linha = "porta="+String(numeroF)+"&acao=desliga&central="+ipLocalString;
 		gravarBanco(linha);
-		gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
+		//gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
 		linha = "";
 		
 	}else if (acaoF == "puls"){
@@ -188,10 +188,10 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
 
 String teste_conexao(){
 	WiFiClient client = server.available();
- 	if(millis() >= time3+time3Param)
+	if(millis() >= time3+time3Param)
 	{
 		time3 = millis();
-		 
+		
 		int r = client.connect(servidor, portaServidor);
 		if(r == 0)
 		{
@@ -199,8 +199,8 @@ String teste_conexao(){
 			retorno = "ERRO_SERVIDOR_DESC";
 		}else if(r == 1)
 		{
-			 Serial.println(" Servidor WEB/Banco OK ");
-			 retorno = "SERVIDOR_CONECT";
+			Serial.println(" Servidor WEB/Banco OK ");
+			retorno = "SERVIDOR_CONECT";
 		}
 	}
 	return retorno;
@@ -222,19 +222,17 @@ void gravarBanco (String buffer){
 			delay(1000);
 		} 
 	}
-	Serial.println(" Servidor Banco de dados: "+String(servidor));
 	if ((client.connect(servidor, portaServidor) == true) && (teste_conexao() == "SERVIDOR_CONECT")) 
-		{
-			//if (client.connect(servidor, 80)) {
-			Serial.print(" Enviando..."+buffer);
-			client.println("GET /web/gravar.php?"+buffer);
-			//gravaLog(" "+hora_ntp + " - COMANDO: "+buffer, logtxt, 4);
-			client.println();
-			buffer = "";
-		} else {
-			gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor WEB ou Banco de Dados Desconectado...:", logtxt, 1);
-			buffer = "";
-		}
+	{
+		//if (client.connect(servidor, 80)) {
+		client.println("GET /web/gravar.php?"+buffer);
+		gravaLog(" "+hora_ntp + " - Gravando no banco de dados: "+buffer, logtxt, 4);
+		client.println();
+		buffer = "";
+	} else {
+		gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor WEB ou Banco de Dados Desconectado...:", logtxt, 1);
+		buffer = "";
+	}
 
 	client.flush();
 	client.stop();
@@ -247,15 +245,15 @@ void gravarBanco (String buffer){
 //--------------------------------------- 
 void sirene(boolean valor){
 	if(valor == true){
-		 ledcWriteTone(channel, 2000);
-     delay(400);
-     ledcWriteTone(channel, 1800);
-     delay(400);
-     ledcWriteTone(channel, 1000);
-     delay(300);
-     
+		ledcWriteTone(channel, 2000);
+		delay(400);
+		ledcWriteTone(channel, 1800);
+		delay(400);
+		ledcWriteTone(channel, 1000);
+		delay(300);
+		
 	}else{
-		ledcWriteTone(channel, false);
+		ledcWriteTone(channel, 0);
 	}
 }
 //---------------------------------------  
@@ -267,9 +265,9 @@ void sirene(boolean valor){
 void calibrarSensor()
 {
 	//CALIBRACAO INCIAL DO SENSOR DE GAS
-	Serial.print(" Caligrando sensor de gás... ");                
+	Serial.print(" Caligrando sensor de gás");                
 	Ro = MQCalibration(PIN_MQ2);                                      
-	Serial.println(" Calibrado com sucesso- VALOR 'Ro' = "+String(Ro)+" kohm"); 
+	Serial.println("\n Calibrado com sucesso - 'Ro' = "+String(Ro)+" kohm"); 
 }
 
 float calcularResistencia(int tensao)   //funcao que recebe o tensao (dado cru) e calcula a resistencia efetuada pelo sensor. O sensor e a resistência de carga forma um divisor de tensão. 
@@ -339,7 +337,7 @@ void criarArquivo(){
 		wFile = SPIFFS.open("/log.txt","w+");
 		//Verifica a criação do arquivo
 		if(!wFile){
-			gravaLog(" "+hora_ntp + " - ERRO 0108 - Erro ao criar arquivo log.txt", logtxt, 1);
+			//gravaLog(" "+hora_ntp + " - ERRO 0108 - Erro ao criar arquivo log.txt", logtxt, 1);
 		} else {
 			Serial.println(" Arquivo log.txt criado com sucesso!");
 		}
@@ -373,7 +371,7 @@ void gravarArquivo(String msg, String arq) {
 	{
 		File logg = SPIFFS.open("/log.txt","a+");
 		int s = logg.size(); // verificar tamanho do arquivo
-		if (s >= 20000){
+		if (s >= 15000){
 			deletarArquivo("/log.txt");
 			criarArquivo(); 
 			delay(1000);
@@ -396,7 +394,7 @@ void gravarArquivo(String msg, String arq) {
 			gravaLog(" "+hora_ntp + " - ERRO 0106 - Erro ao abrir arquivo "+arq, logtxt, 1);
 		} else {
 			param1.println(msg);
-			Serial.println(" Gravando Paramentos: "+msg);
+			gravaLog(" "+hora_ntp + " - Gravando novos paramentos: "+msg, logtxt, 1);
 		}
 		param1.close();
 	}
@@ -406,7 +404,7 @@ String lerArquivo() {
 	String buff;
 	File ARQUIVO = SPIFFS.open("/log.txt","r");
 	int tamanhoLog = ARQUIVO.size(); // verificar tamanho do arquivo
-    buff = "Tamanho log.txt: "+String(tamanhoLog)+"<br />"; 
+	buff = "Tamanho do log da central: "+String(tamanhoLog)+"<br />"; 
 	while(ARQUIVO.available()) {
 		String line = ARQUIVO.readStringUntil('\n');
 		buff += line+"<br />";
@@ -416,72 +414,72 @@ String lerArquivo() {
 }
 String lerArquivoParam(void) {
 	String buff;
-  File ARQUIVO = SPIFFS.open("/param.txt","r");
-  //Serial.println("Lendo Parametros da central...");
-  while(ARQUIVO.available()) {
-    String line = ARQUIVO.readStringUntil('\n');
-    buff += line;
-  }
-  ARQUIVO.close();
-  return buff;
+	File ARQUIVO = SPIFFS.open("/param.txt","r");
+	//Serial.println("Lendo Parametros da central...");
+	while(ARQUIVO.available()) {
+		String line = ARQUIVO.readStringUntil('\n');
+		buff += line;
+	}
+	ARQUIVO.close();
+	return buff;
 }
 void closeFS(){
 	SPIFFS.end();
 }
 void openFS(){
 	//Abre o sistema de arquivos
-  SPIFFS.begin();
+	SPIFFS.begin();
 	if(!SPIFFS.begin()){
 		gravaLog(" "+hora_ntp + " - ERRO 0107 - Erro ao abrir sistema de arquivo interno da central! ", logtxt, 1);
-		} else {
-		Serial.println(" Sistema de arquivos aberto com sucesso!");
+	} else {
+		gravaLog(" "+hora_ntp + " - Sistema de arquivos aberto com sucesso!", logtxt, 4);
 	}
 }
 //---------------------------------------  
 
 //callback que indica que o ESP entrou no modo AP
 void configModeCallback (WiFiManager *myWiFiManager) {  
-//  Serial.println("Entered config mode");
-  Serial.println(" Entrou no modo de configuração ");
-  Serial.println(WiFi.softAPIP()); //imprime o IP do AP
-  Serial.println(myWiFiManager->getConfigPortalSSID()); //imprime o SSID criado da rede
+	//  Serial.println("Entered config mode");
+	Serial.println(" Entrou no modo de configuração ");
+	Serial.println(WiFi.softAPIP()); //imprime o IP do AP
+	Serial.println(myWiFiManager->getConfigPortalSSID()); //imprime o SSID criado da rede
 
 }
 
 //callback que indica que salvamos uma nova rede para se conectar (modo estação)
 void saveConfigCallback () {
-//  Serial.println("Should save config");
-  Serial.println(" Configuração salva ");
-  Serial.println(WiFi.softAPIP()); //imprime o IP do AP
+	//  Serial.println("Should save config");
+	Serial.println(" Configuração salva ");
+	Serial.println(WiFi.softAPIP()); //imprime o IP do AP
 }
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    Serial.printf("Listando Diretórios: %s\r\n", dirname);
+	Serial.printf("Listando Diretórios: %s\r\n", dirname);
 
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("- Falha ao abrir diretório");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println(" - Diretório não encontrado");
-        return;
-    }
+	File root = fs.open(dirname);
+	if(!root){
+		Serial.println("- Falha ao abrir diretório");
+		return;
+	}
+	if(!root.isDirectory()){
+		Serial.println(" - Diretório não encontrado");
+		return;
+	}
 
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  Arquivo: ");
-            Serial.print(file.name());
-            Serial.print("\tTamanho: ");
-            Serial.println(file.size());
-        }
-        file = root.openNextFile();
-    }
+	File file = root.openNextFile();
+	while(file){
+		if(file.isDirectory()){
+			Serial.print("  DIR : ");
+			Serial.println(file.name());
+			if(levels){
+				listDir(fs, file.name(), levels -1);
+			}
+		} else {
+			Serial.print("  Arquivo: ");
+			Serial.print(file.name());
+			Serial.print("\tTamanho: ");
+			Serial.println(file.size());
+		}
+		file = root.openNextFile();
+	}
 }

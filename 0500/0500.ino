@@ -228,28 +228,28 @@ void loop() {
 		serv = String(servidor);
 		gravaLog(" "+hora_ntp + " - Servidor Banco de dados:	 "+String(servidor), logtxt, 2);
 
-		botao1.nomeInter 	= root["int_1"];    Serial.print(" *Input 1: " + String(botao1.nomeInter));
-		botao1.tipo 		= root["tipo_1"];    	Serial.print(" tipo: " + String(botao1.tipo));
-		botao1.modelo 		= root["sinal_1"];  Serial.println(" modelo: " + String(botao1.modelo));
+		botao1.nomeInter 	= root["int_1"];    //Serial.print(" *Input 1: " + String(botao1.nomeInter));
+		botao1.tipo 		= root["tipo_1"];    	//Serial.print(" tipo: " + String(botao1.tipo));
+		botao1.modelo 		= root["sinal_1"];  //Serial.println(" modelo: " + String(botao1.modelo));
 		gravaLog(" "+hora_ntp + "   Interruptor 1 : "+String(botao1.nomeInter)+" / "+String(botao1.tipo)+" / "+String(botao1.modelo), logtxt, 2);
 
-		botao2.nomeInter	= root["int_2"];    Serial.print(" *Input 2: " + String(botao2.nomeInter));
-		botao2.tipo			= root["tipo_2"];     Serial.print(" tipo: " + String(botao2.tipo));
-		botao2.modelo 		= root["sinal_2"];  Serial.println(" modelo: " + String(botao2.modelo));
+		botao2.nomeInter	= root["int_2"];    //Serial.print(" *Input 2: " + String(botao2.nomeInter));
+		botao2.tipo			= root["tipo_2"];     //Serial.print(" tipo: " + String(botao2.tipo));
+		botao2.modelo 		= root["sinal_2"];  //Serial.println(" modelo: " + String(botao2.modelo));
 		gravaLog(" "+hora_ntp + "   Interruptor 2 : "+String(botao2.nomeInter)+" / "+String(botao2.tipo)+" / "+String(botao2.modelo), logtxt, 2);
 
-		botao3.nomeInter	= root["int_3"];    Serial.print(" *Input 3: " + String(botao3.nomeInter));
-		botao3.tipo			= root["tipo_3"];     Serial.print(" tipo: " + String(botao3.tipo));
-		botao3.modelo 		= root["sinal_3"];  Serial.println(" modelo: " + String(botao3.modelo));
+		botao3.nomeInter	= root["int_3"];    //Serial.print(" *Input 3: " + String(botao3.nomeInter));
+		botao3.tipo			= root["tipo_3"];     //Serial.print(" tipo: " + String(botao3.tipo));
+		botao3.modelo 		= root["sinal_3"];  //Serial.println(" modelo: " + String(botao3.modelo));
 		gravaLog(" "+hora_ntp + "   Interruptor 3 : "+String(botao3.nomeInter)+" / "+String(botao3.tipo)+" / "+String(botao3.modelo), logtxt, 2);
 
-		botao4.nomeInter	= root["int_4"];    Serial.print(" *Input 4: " + String(botao4.nomeInter));
-		botao4.tipo			= root["tipo_4"];     Serial.print(" tipo: " + String(botao4.tipo));
-		botao4.modelo 		= root["sinal_4"];  Serial.println(" modelo: " + String(botao4.modelo));
+		botao4.nomeInter	= root["int_4"];    //Serial.print(" *Input 4: " + String(botao4.nomeInter));
+		botao4.tipo			= root["tipo_4"];     //Serial.print(" tipo: " + String(botao4.tipo));
+		botao4.modelo 		= root["sinal_4"];  //Serial.println(" modelo: " + String(botao4.modelo));
 		gravaLog(" "+hora_ntp + "   Interruptor 4 : "+String(botao4.nomeInter)+" / "+String(botao4.tipo)+" / "+String(botao4.modelo), logtxt, 2);
 
-		conslog		= root["log"];  Serial.println(" Log: " + String(conslog));
-		gravaLog(" "+hora_ntp + "   Nível Log : "+String(conslog), logtxt, 2);;
+		conslog		= root["log"];  //Serial.println(" Log: " + String(conslog));
+		gravaLog(" "+hora_ntp + "   Grava Log : "+String(conslog), logtxt, 2);;
 		logtxt = String(conslog);
 		nivelLog = root["nivel"];  Serial.println(" Nivel: " + String(nivelLog));
 		

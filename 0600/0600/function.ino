@@ -1,27 +1,12 @@
-void dataHoraNTP()
-{
-	//DateTime now = rtc.now();
-//	String anoRTC = String(now.year());
-//	String mesRTC = String(now.month());
-//	String diaRTC = String(now.day());
-//	char *diaSemanaRTC = daysOfTheWeek[now.dayOfTheWeek()];
-//	int hora_RTC = now.hour();
-//	int minutoRTC = now.minute();
-//	int segundosRTC = now.second();
-	hora_ntp   = timeClient.getFormattedTime();
-	//hora_rtc = String(hora_RTC) + ":" + String(minutoRTC) + ":" + String(segundosRTC);
-}
-
 void portaIO(int entrada, int rele, const char* tipo,const char* modelo,char contador, boolean estado){
 	String s_tipo_1 = String(tipo);
 	String s_modelo_1 = String(modelo);
 	if (s_modelo_1 == "pulso")
 	{
-
 		if (digitalRead(entrada) == s_tipo_1.toInt())
 		{
 			if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo pulso... ");
-			while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 100) )
+			while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
 			{
 				if (millis() >= tempo + paramTempo)
 				{
@@ -46,16 +31,16 @@ void portaIO(int entrada, int rele, const char* tipo,const char* modelo,char con
 	}
 	if ((contador >= 2) && (contador <= 9))
 	{
-		if (nContar >= 100)
+		if (nContar >= 300)
 		{
 			
 			if(n == 0)
 			{
 				for(int i = 0; i <=0 ;i++ )
 				{
-					String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
+					String ERRO_ENTRADA =" - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
 					//Gravando log de erro na central.
-					if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
+					gravaLog(" "+hora_ntp + "   Grava Log : "+ERRO_ENTRADA, logtxt, 2);
 					n = 1;
 				}
 			}
@@ -272,7 +257,7 @@ void calibrarSensor()
 
 float calcularResistencia(int tensao)   //funcao que recebe o tensao (dado cru) e calcula a resistencia efetuada pelo sensor. O sensor e a resistência de carga forma um divisor de tensão. 
 {
-	return (((float)VRL_VALOR*(1023-tensao)/tensao));
+	return (((float)VRL_VALOR*(4095-tensao)/tensao));
 }
 
 float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente limpo utilizando a resistencia do sensor em ar limpo 9.83
@@ -337,7 +322,6 @@ void criarArquivo(){
 		wFile = SPIFFS.open("/log.txt","w+");
 		//Verifica a criação do arquivo
 		if(!wFile){
-			//gravaLog(" "+hora_ntp + " - ERRO 0108 - Erro ao criar arquivo log.txt", logtxt, 1);
 		} else {
 			Serial.println(" Arquivo log.txt criado com sucesso!");
 		}

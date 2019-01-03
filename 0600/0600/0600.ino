@@ -1,4 +1,4 @@
-String VERSAO = "V0602 - 02/01/2019";
+String VERSAO = "V0603 - 03/01/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -14,6 +14,7 @@ String VERSAO = "V0602 - 02/01/2019";
 #include <NTPClient.h>
 #include <WiFiUDP.h>
 #include <Wire.h>
+//#include <RTClib.h>
 #include <SPIFFS.h>
 #include <FS.h>
 #include <ArduinoJson.h>
@@ -102,7 +103,10 @@ float SmokeCurve[3] = {2.3, 0.53, -0.44}; //curva LPG aproximada baseada na sens
 //inclinacao = (Y2-Y1)/(X2-X1)
 //vetor={x, y, inclinacao}
 float Ro = 10;
+// Variables to save date and time
+String formattedDate;
 String dayStamp;
+String timeStamp;
 //---------------------------------------
 
 //---------------------------------------
@@ -111,6 +115,8 @@ String dayStamp;
 DHT dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
 //---------------------------------------
+//const char* ssid = "redeb";
+//const char* password = "!g@t0pret0203154121";
 
 void setup() {
   Serial.begin(115200);
@@ -218,7 +224,8 @@ void setup() {
   ArduinoOTA.begin();
   retorno = "SERVIDOR_CONECT";
   timeClient.begin();
-  timeClient.update();
+  timeClient.setTimeOffset(-7200);
+ 
   checkOST();
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
@@ -226,22 +233,20 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-	WiFiManager wifiManager;
+  WiFiManager wifiManager;
   WiFiClient client = server.available();
 	while(!timeClient.update()) {
     timeClient.forceUpdate();
   }
+  formattedDate = timeClient.getFormattedDate();
 	int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(0, splitT); //https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
-  hora_ntp   = dayStamp + " - "+timeClient.getFormattedTime();
+  hora_ntp   = dayStamp + "-"+timeClient.getFormattedTime();
 
   while (cont_ip_banco < 1)
   { 
     //Gravando no log o reinicio da central
-    gravarArquivo(" "+hora_ntp + " ******************************* \n ****** CENTRAL REINICIADA ***** \n ******************************* ", "log.txt");
-    //gravarArquivo(" "+hora_ntp + " ****** CENTRAL REINICIADA *****  ", "log.txt");
-    //gravarArquivo(" "+hora_ntp + " *******************************  ", "log.txt");
-    //Leitura de parametros da central
+    gravarArquivo(" "+hora_ntp + " \n\n ******************************* \n ****** CENTRAL REINICIADA ***** \n ******************************* ", "log.txt");
     StaticJsonDocument<700> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
@@ -275,10 +280,10 @@ void loop() {
 
     botao4.nomeInter  = root["int_4"];    
     botao4.tipo     = root["tipo_4"];     
-    botao4.modelo     = root["sinal_4"];  /
+    botao4.modelo     = root["sinal_4"];
     gravaLog(" "+hora_ntp + "   Interruptor 4 : "+String(botao4.nomeInter)+" / "+String(botao4.tipo)+" / "+String(botao4.modelo), logtxt, 2);
     
-		conslog   = root["log"];  
+    conslog   = root["log"];  
     logtxt = String(conslog);
     nivelLog = root["nivel"];
     verao = root["verao"];
@@ -306,12 +311,252 @@ void loop() {
   }
 
   //---------------------------------------
-  //    ENTRADA E SAIDA 
+  //    ENTRADA E SAIDA 1
   //---------------------------------------
-	
-	portaIO(botao1.tipo, botao1.rele, botao1.tipo,botao1.modelo,botao1.contador, botao1.estado);
-	portaIO(botao2.tipo, botao2.rele, botao2.tipo,botao2.modelo,botao2.contador, botao2.estado);
-	
+  String s_tipo_1 = String(botao1.tipo);
+  String s_modelo_1 = String(botao1.modelo);
+  if (s_modelo_1 == "pulso")
+  {
+    if (digitalRead(botao1.entrada) == s_tipo_1.toInt())
+    {
+      if (nContar == 0)Serial.println("\n");Serial.println("\n Entrada 1 - Modo pulso... ");
+      while ((digitalRead(botao1.entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao1.contador++;
+          nContar++;
+          Serial.print(botao1.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  } else if (s_modelo_1 == "interruptor")
+  {
+
+    botao1.estado_atual = digitalRead(botao1.entrada);
+    if (botao1.estado_atual != botao1.estado_antes )
+    {
+      if (nContar == 0)Serial.println(" Entrada 1 - Modo interruptor... ");
+      botao1.estado_antes = botao1.estado_atual;
+      botao1.contador = 3;
+      //Serial.print(botao1.contador, DEC);
+    }
+  }
+  if ((botao1.contador >= 2) && (botao1.contador <= 9))
+  {
+    if (nContar >= 100)
+    {
+      
+      if(n == 0)
+      {
+        for(int i = 0; i <=0 ;i++ )
+        {
+          String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor 1 (Porta IN: "+botao1.rele+" Porta OUT: "+botao1.entrada+") com erro de execução, deve usar a pagina para reiniciar";
+          //Gravando log de erro na central.
+          if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
+          n = 1;
+        }
+      }
+    } else
+    {
+      String ERRO_ENTRADA = "0";
+      nContar = 0;
+      if (botao1.estado == false) {
+        Serial.println(" Ligando Porta (rele 1): " + String(botao1.rele));
+        botao1.estado = true;
+        botao1.contador = 0;
+        acionaPorta(botao1.rele, "", "liga");
+      } else {
+        Serial.println(" Desligar Porta (rele 1): " + String(botao1.rele));
+        acionaPorta(botao1.rele, "", "desl");
+        botao1.estado = false;
+        botao1.contador = 0;
+      }
+    }
+  }
+  //---------------------------------------
+
+  //---------------------------------------
+  //    ENTRADA E SAIDA 2
+  //---------------------------------------
+  String s_tipo_2 = String(botao2.tipo);
+  String s_modelo_2 = String(botao2.modelo);
+  if (s_modelo_2 == "pulso")
+  {
+    if (digitalRead(botao2.entrada) == s_tipo_2.toInt())
+    {
+      if (nContar == 0)Serial.println(" Entrada 2 - Modo pulso... ");
+      while ((digitalRead(botao2.entrada) == s_tipo_2.toInt()) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao2.contador++;
+          nContar++;
+          Serial.print(botao2.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  } else if (s_modelo_2 == "interruptor")
+  {
+    botao2.estado_atual = digitalRead(botao2.entrada);
+    if (botao2.estado_atual != botao2.estado_antes )
+    {
+      if (nContar == 0)Serial.println(" Entrada 2 - Modo interruptor... ");
+      botao2.estado_antes = botao2.estado_atual;
+      botao2.contador = 3;
+      //Serial.print(botao2.contador, DEC);
+    }
+  }
+  if ((botao2.contador >= 2) && (botao2.contador <= 9))
+  {
+    if (nContar >= 100)
+    {
+      for(int i = 0; i <=0 ;i++ )
+      {
+        String ERRO_ENTRADA = " ERRO 0107 - Botão 2 com erro de execução, reiniciar central";
+        //Gravando log de erro na central.
+        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 2 com erro de execução, reiniciar central", "log.txt");
+      }
+    } else
+    {
+      String ERRO_ENTRADA = "0";
+      nContar = 0;
+      if (botao2.estado == false) {
+        Serial.println(" Ligando Porta (rele 2): " + String(botao2.rele));
+        botao2.estado = true;
+        botao2.contador = 0;
+        acionaPorta(botao2.rele, "", "liga");
+      } else {
+        Serial.println(" Desligar Porta (rele 2): " + String(botao2.rele));
+        acionaPorta(botao2.rele, "", "desl");
+        botao2.estado = false;
+        botao2.contador = 0;
+      }
+    }
+  }
+  //---------------------------------------
+
+  //---------------------------------------
+  //    ENTRADA E SAIDA 3
+  //---------------------------------------
+  String s_tipo_3 = String(botao3.tipo);
+  String s_modelo_3 = String(botao3.modelo);
+  if (s_modelo_3 == "pulso")
+  {
+    if (digitalRead(botao3.entrada) == s_tipo_3.toInt())
+    {
+      if (nContar == 0)Serial.println(" Entrada 3 - Modo pulso... ");
+      while ((digitalRead(botao3.entrada) == s_tipo_3.toInt()) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao3.contador++;
+          nContar++;
+          Serial.print(botao3.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  } else if (s_modelo_3 == "interruptor")
+  {
+    botao3.estado_atual = digitalRead(botao3.entrada);
+    if (botao3.estado_atual != botao3.estado_antes )
+    {
+      if (nContar == 0)Serial.print(" Entrada 3 - Modo interruptor... ");
+      botao3.estado_antes = botao3.estado_atual;
+      botao3.contador = 3;
+      //Serial.print(botao3.contador, DEC);
+    }
+  }
+  if ((botao3.contador >= 2) && (botao3.contador <= 9))
+  {
+    if (nContar >= 100)
+    {
+      for(int i = 0; i <=0 ;i++ )
+      {
+        String ERRO_ENTRADA = " ERRO 0107 - Botão 3 com erro de execução, reiniciar central";
+        //Gravando log de erro na central.
+        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 3 com erro de execução, reiniciar central", "log.txt");
+      } 
+    } else
+    {
+      String ERRO_ENTRADA = "0";
+      nContar = 0;
+      if (botao3.estado == false) {
+        Serial.println(" Ligando Porta (rele 3): " + String(botao3.rele));
+        botao3.estado = true;
+        botao3.contador = 0;
+        acionaPorta(botao3.rele, "", "liga");
+      } else {
+        Serial.println(" Desligar Porta (rele 3): " + String(botao3.rele));
+        acionaPorta(botao3.rele, "", "desl");
+        botao3.estado = false;
+        botao3.contador = 0;
+      }
+    }
+  }
+  //---------------------------------------
+  //---------------------------------------
+  //    ENTRADA E SAIDA 4
+  //---------------------------------------
+  String s_tipo_4 = String(botao4.tipo);
+  String s_modelo_4 = String(botao4.modelo);
+  if (s_modelo_4 == "pulso")
+  {
+    if (digitalRead(botao4.entrada) == s_tipo_4.toInt())
+    {
+      if (nContar == 0)Serial.println("\n");Serial.println("\n Entrada 4 - Modo pulso... ");
+      while ((digitalRead(botao4.entrada) == s_tipo_4.toInt()) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao4.contador++;
+          nContar++;
+          Serial.print(botao4.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  } else if (s_modelo_4 == "interruptor")
+  {
+
+    botao4.estado_atual = digitalRead(botao4.entrada);
+    if (botao4.estado_atual != botao4.estado_antes )
+    {
+      if (nContar == 0)Serial.println(" Entrada 4 - Modo interruptor... ");
+      botao4.estado_antes = botao4.estado_atual;
+      botao4.contador = 3;
+      //Serial.print(botao4.contador, DEC);
+    }
+  }
+  if ((botao4.contador >= 2) && (botao4.contador <= 9))
+  {
+    if (nContar >= 100)
+    {
+      for(int i = 0; i <=0 ;i++ )
+      {
+        String ERRO_ENTRADA = " ERRO 0107 - Botão 4 com erro de execução, reiniciar central";
+        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 4 com erro de execução, reiniciar central", "log.txt");
+      }
+    } else
+    {
+      String ERRO_ENTRADA = "0";
+      nContar = 0;
+      if (botao4.estado == false) {
+        Serial.println("\n Ligando Porta (rele 4): " + String(botao4.rele));
+        botao4.estado = true;
+        botao4.contador = 0;
+        acionaPorta(botao4.rele, "", "liga");
+      } else {
+        Serial.println("\n Desligar Porta (rele 4): " + String(botao4.rele));
+        acionaPorta(botao4.rele, "", "desl");
+        botao4.estado = false;
+        botao4.contador = 0;
+      }
+    }
+  }
   //---------------------------------------
   //---------------------------------------
   //    LIGAR E DESLIGAR TODOS RELES
@@ -362,7 +607,7 @@ void loop() {
       String central = stringUrl.substring(33, 40);
       int numeroInt = numero.toInt();
       nContar = 0;
-			n=0;
+	n=0;
       acionaPorta(numeroInt, requisicao, acao);
       if (numeroInt == botao1.rele) {
         if (acao == "liga") {
@@ -411,6 +656,7 @@ void loop() {
     if (codidoExec == "00011")
     {
       gravaLog(" "+hora_ntp+" - Novo valor de leitura do sensor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
+      //Serial.println(" Novo valor de leitura do sensor MQ-2: " + String(valorMQ_Novo));
       EEPROM.begin(64);
       EEPROM.write(MEM_EEPROM_MQ2, byte(valorMQ_Novo));
       EEPROM.commit();
@@ -446,13 +692,14 @@ void loop() {
       criarArquivo();
       gravaLog(" "+hora_ntp+" - Configuração minima gravada na central", logtxt, 3);
 	    gravarArquivo("{\"servidor\":\"192.168.0.20\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\"}","param.txt");
+	  //gravarArquivo("{\"servidor\":\"192.168.0.20"\",\"int_1\":\"1\",\"int_2\":\"2\",\"int_3\":\"3\",\"int_4\":\"4\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\"}","param.txt");
       closeFS();
     }
     if (requisicao == "00015") // DESLIGAR TODOS AS PORTAS OUTPUT
     {
       botao1.contador = 31;
     }
-		if (requisicao == "00016") // APLICAR AS CONFIGURAÇÕES, FAZER NOVA LEITURA DO JSON
+	if (requisicao == "00016") // APLICAR AS CONFIGURAÇÕES, FAZER NOVA LEITURA DO JSON
     {
       cont_ip_banco = 0;
     }
@@ -461,10 +708,22 @@ void loop() {
     //    PAGINA WEB DA CENTRAL - ARQUIVO WEB.INO
     //---------------------------------------
     String buf;
-    buf += String(CC_HEAD_HTML); 			// Cabeçalho e HEAD HTML da pagina.
+    buf += "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+    buf += "<!DOCTYPE html>";
+    buf += "<html lang=\"pt-br\">";
+    buf += "<head>";
+    buf += "<meta charset=\"utf-8\">";
+    buf += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">";
+    buf += "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\">";
+    buf += "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px }</style>";
+    buf += "<title>Central Automação</title></head>";
     buf += "<body>";
     buf += "<div class=\"container shadow-lg p-3 mb-5 bg-white rounded\">";
-    buf += String(CC_UL_NAV_HTML);		// Menu navegação superior da pagina.
+    buf += "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\">";
+    buf += "<li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li>";
+    buf += "<li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li>";
+    buf += "<li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-contact-tab\" data-toggle=\"pill\" href=\"#pills-contact\" role=\"tab\" aria-controls=\"pills-contact\" aria-selected=\"false\">Contato</a></li>";
+    buf += "</ul>";
     buf += "<div class=\"tab-content\" id=\"pills-tabContent\">";
     buf += "<div class=\"tab-pane fade show active\" id=\"pills-home\" role=\"tabpanel\" aria-labelledby=\"pills-home-tab\">";
     buf += "<h4><a href=\"http://" + ipLocalString + "\">CENTRAL -" + ipLocalString + "</a></h4>";

@@ -1,4 +1,4 @@
-String VERSAO = "V0604 - 05/01/2019";
+String VERSAO = "V0605 - 05/01/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -14,7 +14,6 @@ String VERSAO = "V0604 - 05/01/2019";
 #include <NTPClient.h>
 #include <WiFiUDP.h>
 #include <Wire.h>
-//#include <RTClib.h>
 #include <SPIFFS.h>
 #include <FS.h>
 #include <ArduinoJson.h>
@@ -226,7 +225,7 @@ void setup() {
   timeClient.begin();
   timeClient.setTimeOffset(-7200);
  
-  checkOST();
+  //checkOST();
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   gravarArquivo(" \n\n ******************************* \n ****** INICIANDO CENTRAL ***** \n ******************************* ", "log.txt");
@@ -238,7 +237,7 @@ void loop() {
   WiFiClient client = server.available();
 	while(!timeClient.update()) 
 	{
-    timeClient.getFormattedDate();
+    timeClient.getFormattedDate(5);
   }
   formattedDate = timeClient.getFormattedDate();
 	int splitT = formattedDate.indexOf("T");
@@ -588,8 +587,6 @@ void loop() {
   {
     URL = "";
     URL = client.readStringUntil('\r');
-    //Serial.print(" Recebido: ");
-   //Serial.println(URL);
   } else {
     URL = "vazio";
   }
@@ -598,10 +595,8 @@ void loop() {
     //EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA - ?porta=20&acao=desligar&central=192.168.0.177
     String stringUrl = URL;
     gravaLog(" "+hora_ntp + " - Recebido via GET : "+String(URL), logtxt, 4);
-
     URL = "";
     String requisicao = stringUrl.substring(6, 11);
-    //Serial.println(requisicao);
     if (requisicao == "porta") {
       String numero = stringUrl.substring(12, 14);
       String acao = stringUrl.substring(20, 24);
@@ -657,7 +652,6 @@ void loop() {
     if (codidoExec == "00011")
     {
       gravaLog(" "+hora_ntp+" - Novo valor de leitura do sensor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
-      //Serial.println(" Novo valor de leitura do sensor MQ-2: " + String(valorMQ_Novo));
       EEPROM.begin(64);
       EEPROM.write(MEM_EEPROM_MQ2, byte(valorMQ_Novo));
       EEPROM.commit();
@@ -694,7 +688,6 @@ void loop() {
       criarArquivo();
       gravaLog(" "+hora_ntp+" - Configuração minima gravada na central", logtxt, 3);
 	    gravarArquivo("{\"servidor\":\"192.168.0.20\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\"}","param.txt");
-	  //gravarArquivo("{\"servidor\":\"192.168.0.20"\",\"int_1\":\"1\",\"int_2\":\"2\",\"int_3\":\"3\",\"int_4\":\"4\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\"}","param.txt");
       closeFS();
     }
     if (requisicao == "00015") // DESLIGAR TODOS AS PORTAS OUTPUT
@@ -705,7 +698,6 @@ void loop() {
     {
       cont_ip_banco = 0;
     }
-    
     //---------------------------------------
     //    PAGINA WEB DA CENTRAL - ARQUIVO WEB.INO
     //---------------------------------------
@@ -761,12 +753,10 @@ void loop() {
     buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
     buf += "</p></div></div>";
     buf += "<div class=\"tab-pane fade\" id=\"pills-profile\" role=\"tabpanel\" aria-labelledby=\"pills-profile-tab\">";
-    buf += "<p>";
-    buf += "<\p><h4>Configurar Sensor</h4>";
+    buf += "<h4>Configurar Sensor</h4>";
     buf += "<form class=\"form-group\" method=\"get\"><table class=\"table-responsive\" style=\"width:100%\"><tr><td><input type=\"hidden\" name=\"cod\" value=\"00011\"><label for=\"inputEmail4\">Limite Sensor Gás: </label></td><td><input class=\"form-control mb-2\" style=\"width:50px\" type=\"text\" placeholder=\"\" name=\"valor\" value=\"" + String(LIMITE_MQ2) + "\"></td><td> <input class=\"btn btn-info\" type=\"submit\" value=\"Alterar\"><a href=\"?00010\"></td><td><button class=\"btn btn-warning\" type=\"button\"  >Recalibrar</button></a></td></tr></table></form>";
     buf += "<h4>Parâmetros Gerais</h4>";
-    buf += "<form class=\"form-group\" action=\"?00012\"><table class=\"table-responsive\" style=\"width:100%\"><input type=\"hidden\" name=\"cod\" value=\"00012\">";
-    //buf += "<tr><td><label for=\"inputEmail4\">Hora da Central</label> </td><td><input  class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"hora\" value=\"" + hora_rtc + "\"></td><td></td><td></td></tr>";
+    buf += "<form class=\"form-group\" action=\"?00012\"><table class=\"table-responsive\"><input type=\"hidden\" name=\"cod\" value=\"00012\">";
     buf += "<tr><td ><label for=\"inputEmail4\">Servidor</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + serv + "\"></td></tr>";
     buf += "<tr>";
     buf += "<td><label for=\"inputEmail4\">Interruptor 1</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_1\" value=\"" + String(botao1.nomeInter) + "\"></td>";
@@ -788,7 +778,7 @@ void loop() {
     buf += "<tr><td><label for=\"inputEmail4\">Horario de Verão</label></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"verao\"><option value=\"sim\" "+selectedHTNL(verao, "sim")+"> Sim</option><option value=\"nao\" "+selectedHTNL(verao, "nao")+">Não</option></select></td><td></td><td></div></td></tr>";
     // Botao Salvar Config
-    buf += "<tr><td></td><td></td><td><button class=\"btn btn-primary\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Logs</button></p></div></td><td><input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\"></td></tr>";
+    buf += "<tr><td></td><td></td><td><button class=\"btn btn-primary\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Logs</button></div></td><td><input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\"></td></tr>";
     buf += "</table></form>";
     buf += "<div class=\"collapse\" id=\"collapseExample\"><div class=\"card card-body\">";
     buf += lerArquivo();

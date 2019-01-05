@@ -107,12 +107,6 @@ String selectedHTNL(const char* tipo, String comp )
 		return select = "";
 	}
 }
-
-//void ajustaHora( int ano, int mes, int dia, int hora, int minuto ){
-//	Serial.println(" Corrigindo data e hora...");
-//	rtc.adjust(DateTime(ano, mes, dia, hora, minuto, 0));
-//}
-
 String quebraString(String txtMsg,String string)
 { 
 	unsigned int tamanho = txtMsg.length();
@@ -122,24 +116,6 @@ String quebraString(String txtMsg,String string)
 	//Serial.println(resultado);
 	return resultado;
 } 
-
-void forceUpdate(void) 
-{
-	timeClient.forceUpdate();
-}
-
-void checkOST()
-{
-	currentMillis = millis();//Tempo atual em ms
-	//Lógica de verificação do tempo
-	if (currentMillis - previousMillis > 1000) 
-	{
-		previousMillis = currentMillis;    // Salva o tempo atual
-		printf("Time Epoch: %d: ", timeClient.getEpochTime());
-		//Serial.println(timeClient.getFormattedTime());
-	}
-}
-
 //---------------------------------------  
 //    FUNÇÃO PARA ACIONAMENTO DE PORTAS 
 //    GPIO
@@ -151,13 +127,11 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
 		linha = "porta="+String(numeroF)+"&acao=liga&central="+ipLocalString;
 		gravarBanco(linha);
 		linha = "";
-		
 	}else if (acaoF == "desl") {
 		digitalWrite(numeroF, LOW);
 		linha = "porta="+String(numeroF)+"&acao=desliga&central="+ipLocalString;
 		gravarBanco(linha);
 		linha = "";
-		
 	}else if (acaoF == "puls"){
 		linha = "porta="+String(numeroF)+"&acao=pulso&central="+ipLocalString;
 		gravarBanco(linha);
@@ -166,15 +140,12 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
 		digitalWrite(numeroF, LOW);
 		linha = "";
 	}
-	
 }
-
 String teste_conexao(){
 	WiFiClient client = server.available();
 	if(millis() >= time3+time3Param)
 	{
 		time3 = millis();
-		
 		int r = client.connect(servidor, portaServidor);
 		if(r == 0)
 		{
@@ -200,7 +171,7 @@ void gravarBanco (String buffer){
 		WiFi.reconnect();
 		if(WiFi.status() != WL_CONNECTED){
 			Serial.println(" ");
-			gravaLog(" "+hora_ntp + " - Falha ao conectar ao WIFI e atingir o tempo limite, reiniciando a central!", logtxt, 1);
+			gravaLog(" "+hora_ntp + " - Falha ao conectar ao WIFI e atingir o tempo limite", logtxt, 1);
 			//ESP.restart();
 			delay(1000);
 		} 
@@ -216,7 +187,6 @@ void gravarBanco (String buffer){
 		gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor WEB ou Banco de Dados Desconectado...:", logtxt, 1);
 		buffer = "";
 	}
-
 	client.flush();
 	client.stop();
 }

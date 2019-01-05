@@ -1,4 +1,4 @@
-String VERSAO = "V0603 - 03/01/2019";
+String VERSAO = "V0604 - 05/01/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -76,10 +76,10 @@ struct botao4 {
 //---------------------------------------
 String ipLocalString, buff, URL, linha, GLP,FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf;
 const char *json;
-const char *ssid, *password, *servidor, *conslog, *nivelLog, *verao;
+const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao;
 const int PIN_AP = 3;
-char portaServidor = 80, contarParaGravar1 = 0, contarParaGravar2 = 0 ;
-int nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0,sensorMq2 = 0, contadorPorta = 0, LED_BUILTIN = 2, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_C = 5 , MEM_EEPROM_1 = 7, MEM_EEPROM_2 = 9, MEM_EEPROM_3 = 12, MEM_EEPROM_4 = 14, MEM_EEPROM_MQ2 = 20;
+char portaServidor = 80, contarParaGravar2 = 0 ;
+int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0,sensorMq2 = 0, contadorPorta = 0, LED_BUILTIN = 2, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_C = 5 , MEM_EEPROM_1 = 7, MEM_EEPROM_2 = 9, MEM_EEPROM_3 = 12, MEM_EEPROM_4 = 14, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
 unsigned long time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 10000;
 IPAddress ipHost;
@@ -229,24 +229,25 @@ void setup() {
   checkOST();
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
+  gravarArquivo(" \n\n ******************************* \n ****** INICIANDO CENTRAL ***** \n ******************************* ", "log.txt");
 }
 
 void loop() {
   ArduinoOTA.handle();
   WiFiManager wifiManager;
   WiFiClient client = server.available();
-	while(!timeClient.update()) {
-    timeClient.forceUpdate();
+	while(!timeClient.update()) 
+	{
+    timeClient.getFormattedDate();
   }
   formattedDate = timeClient.getFormattedDate();
 	int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(0, splitT); //https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
-  hora_ntp   = dayStamp + "-"+timeClient.getFormattedTime();
-
+  hora_ntp   = dayStamp + "-"+timeClient.getFormattedTime(); 
+  //hora_ntp = "00000";
   while (cont_ip_banco < 1)
   { 
     //Gravando no log o reinicio da central
-    gravarArquivo(" "+hora_ntp + " \n\n ******************************* \n ****** CENTRAL REINICIADA ***** \n ******************************* ", "log.txt");
     StaticJsonDocument<700> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
@@ -261,7 +262,7 @@ void loop() {
     gravaLog(" "+hora_ntp + " - Configurações da Central ", logtxt, 2);
     servidor      = root["servidor"];
     serv = String(servidor);
-    gravaLog(" "+hora_ntp + " Servidor Banco de dados:   "+String(servidor), logtxt, 2);
+    gravaLog(" "+hora_ntp + "   Servidor Banco de dados:   "+String(servidor), logtxt, 2);
 
     botao1.nomeInter  = root["int_1"];    
     botao1.tipo     = root["tipo_1"];     
@@ -287,7 +288,7 @@ void loop() {
     logtxt = String(conslog);
     nivelLog = root["nivel"];
     verao = root["verao"];
-    gravaLog(" "+hora_ntp + "   Grava Log : "+String(conslog)+ " Nivel: " + String(nivelLog)+" Horario de Verão: " + String(verao), logtxt, 2);
+    gravaLog(" "+hora_ntp + "   Grava Log : "+String(conslog)+ " Nivel: " + String(nivelLog)+" Horario de Verão: " + String(verao), logtxt, 1);
     Serial.println("");
     cont_ip_banco++;
 }
@@ -566,7 +567,7 @@ void loop() {
       || ((botao3.contador >= 30) && (botao3.contador <= 50))
       || ((botao4.contador >= 30) && (botao4.contador <= 50)) )
   {
-    Serial.println("\n>= DESLIGANDO TODOS OS RELES");
+    gravaLog(" "+hora_ntp + "\n - DESLIGANDO TODOS OS RELES", logtxt, 2);
     acionaPorta(botao1.rele, "", "desl");
     botao1.estado = false;
     acionaPorta(botao2.rele, "", "desl");
@@ -587,8 +588,8 @@ void loop() {
   {
     URL = "";
     URL = client.readStringUntil('\r');
-    Serial.print(" Recebido: ");
-    Serial.println(URL);
+    //Serial.print(" Recebido: ");
+   //Serial.println(URL);
   } else {
     URL = "vazio";
   }
@@ -607,7 +608,7 @@ void loop() {
       String central = stringUrl.substring(33, 40);
       int numeroInt = numero.toInt();
       nContar = 0;
-	n=0;
+	    n=0;
       acionaPorta(numeroInt, requisicao, acao);
       if (numeroInt == botao1.rele) {
         if (acao == "liga") {
@@ -676,7 +677,8 @@ void loop() {
       stringUrl = i.substring(0, final_s - 1);
       gravaLog(" "+hora_ntp+" - Novos parâmetros I/O gravado na Central", logtxt, 2);
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl)+ "\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl)+ "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl)+ "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl)+ "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\"}", "param.txt");
-      closeFS();
+      //closeFS();
+      cont_ip_banco = 0;
     }
     if (requisicao == "00013") // APAGAR ARQUIVO DE LOG
     {
@@ -805,7 +807,6 @@ void loop() {
   //---------------------------------------
   if (millis() >= timeMq2 + (timeMq2Param * 1)) {
     sensorMq2 = analogRead(PIN_MQ2);
-    Serial.println(" VALOR ANALOGICO: " + String(sensorMq2));
     if (sensorMq2 < 4000) {
       GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
       if (GLP == "2147483647") GLP = "0";
@@ -813,13 +814,8 @@ void loop() {
       if (FUMACA == "2147483647") FUMACA = "0";
       String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
       if (CO == "2147483647") CO = "0";
-      Serial.print(" GLP:"  + GLP + "ppm     " );
-      Serial.print("CO:"   + CO + "ppm    " );
-      Serial.print("FUMAÇA:" + FUMACA + "ppm    ");
       contarParaGravar1++;
-      Serial.print("Leitura numero: ");
-      Serial.println(contarParaGravar1, DEC);
-      Serial.println("");
+      gravaLog(" "+hora_ntp+" - Sensor MQ2 = Analogico: " + String(sensorMq2)+" GLP:"+GLP+"ppm | "+"CO:"+CO+"ppm | "+"FUMAÇA:"+FUMACA + "ppm | "+"Leituras: "+contarParaGravar1, logtxt, 4);
     } else {
       //Gravando log de erro na central.
       for(int i = 0; i <=0 ;i++ )
@@ -862,6 +858,7 @@ void loop() {
       t = 0;
       temperatura = 0;
       umidade = 0;
+      timeDht = millis();
     }
   }
   //---------------------------------------

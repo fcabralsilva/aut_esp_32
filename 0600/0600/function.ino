@@ -86,9 +86,9 @@ void gravaLog(String mensagem, String permissao, int nivel)
 	//Serial.println(mensagem);
 	for(int i = 0; i <=0 ;i++ )
 	{
-		if (logtxt == "sim")
+		if (permissao == "sim")
 		{
-			if( String(nivel) >= String(nivelLog))
+			if( String(nivel) <= String(nivelLog))
 			{
 				gravarArquivo(mensagem, "log.txt");
 			} 
@@ -145,19 +145,17 @@ void checkOST()
 //    GPIO
 //---------------------------------------  
 void acionaPorta(int numeroF, String portaF, String acaoF) {
-	Serial.println(" Comando:"+String(numeroF)+"/"+acaoF);
+	gravaLog(" "+hora_ntp + " - Comando:"+String(numeroF)+"/"+acaoF, logtxt, 4);
 	if (acaoF == "liga") {
 		digitalWrite(numeroF, HIGH );
 		linha = "porta="+String(numeroF)+"&acao=liga&central="+ipLocalString;
 		gravarBanco(linha);
-		//gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
 		linha = "";
 		
 	}else if (acaoF == "desl") {
 		digitalWrite(numeroF, LOW);
 		linha = "porta="+String(numeroF)+"&acao=desliga&central="+ipLocalString;
 		gravarBanco(linha);
-		//gravaLog(" "+hora_ntp + " - COMANDO: "+linha, logtxt, 4);
 		linha = "";
 		
 	}else if (acaoF == "puls"){

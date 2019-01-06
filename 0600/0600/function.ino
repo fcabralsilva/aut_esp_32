@@ -81,6 +81,22 @@ const char* abreJson(const char* json, const char* etiqueta  )
 	return servidor;
 }
 
+void pisca_led(int LED,boolean estado)
+{
+  if(estado == true)
+  {
+    if (millis() - milis > interval) 
+    {
+      milis = millis();
+      digitalWrite(LED, !digitalRead(LED));
+    }
+  }else
+    {
+      digitalWrite(LED_AZUL, LOW);
+      digitalWrite(LED_VERDE, LOW);
+      digitalWrite(LED_VERMELHO, LOW);
+    }
+}
 void gravaLog(String mensagem, String permissao, int nivel)
 {
 	//Serial.println(mensagem);
@@ -170,12 +186,14 @@ void gravarBanco (String buffer){
 		gravaLog(" "+hora_ntp + " - ERRO 0105 - Não foi possivel conectar ao servidor WEB ou banco de dados, reiniciando a central!", logtxt, 1);
 		WiFi.reconnect();
 		if(WiFi.status() != WL_CONNECTED){
-			Serial.println(" ");
+      pisca_led(LED_VERDE,false);
+      pisca_led(LED_VERMELHO,true);
 			gravaLog(" "+hora_ntp + " - Falha ao conectar ao WIFI e atingir o tempo limite", logtxt, 1);
 			//ESP.restart();
 			delay(1000);
 		} 
 	}
+  pisca_led(LED_VERMELHO,false);
 	if ((client.connect(servidor, portaServidor) == true) && (teste_conexao() == "SERVIDOR_CONECT")) 
 	{
 		//if (client.connect(servidor, 80)) {
@@ -232,13 +250,14 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
 {
 	int i;
 	float valor=0;
-
+  pisca_led(LED_VERDE,false);
 	for (i=0;i<ITERACOES_CALIBRACAO;i++) {    //sao adquiridas diversas amostras e calculada a media para diminuir o efeito de possiveis oscilacoes durante a calibracao
 		Serial.print(".");
 		valor += calcularResistencia(analogRead(mq_pin));
 		delay(500);
 		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));//Faz o LED piscar (inverte o estado).
 	}
+  digitalWrite(LED_AZUL,false);
 	valor = valor/ITERACOES_CALIBRACAO;        
 	valor = valor/RO_FATOR_AR_LIMPO; //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
 	return valor; 
@@ -247,11 +266,13 @@ float leitura_MQ2(int mq_pin)
 {
 	int i;
 	float rs=0;
+  pisca_led(LED_VERDE,false);
 	for (i=0;i<ITERACOES_LEITURA;i++) {
 		rs += calcularResistencia(analogRead(mq_pin));
 		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));//Faz o LED piscar (inverte o estado).
 		delay(10);
 	}
+  digitalWrite(LED_AZUL,false);
 	rs = rs/ITERACOES_LEITURA;
 	return rs;  
 }

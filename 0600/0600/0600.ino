@@ -13,6 +13,7 @@ String VERSAO = "V0605 - 05/01/2019";
 #include <EEPROM.h>
 #include <NTPClient.h>
 #include <WiFiUDP.h>
+#include <Update.h>
 #include <Wire.h>
 #include <SPIFFS.h>
 #include <FS.h>
@@ -33,7 +34,12 @@ String VERSAO = "V0605 - 05/01/2019";
 #define GAS_CO                1
 #define SMOKE                 2
 //---------------------------------------
-
+#define LED_AZUL              2
+#define LED_VERDE             4
+#define LED_VERMELHO          16
+//int value = LOW;                // último valor do LED
+long milis = 0;        // último momento que o LED foi atualizado
+long interval = 250;           // tempo de transição entre estados (milisegundos)
 //---------------------------------------
 //    INSTANCIANDO STRUCT'S
 //---------------------------------------
@@ -148,6 +154,13 @@ void setup() {
 
   pinMode(BUZZER, OUTPUT);
   digitalWrite(BUZZER, LOW);
+
+  pinMode(LED_AZUL, OUTPUT);
+  digitalWrite(LED_AZUL, LOW);
+  pinMode(LED_VERDE, OUTPUT);
+  digitalWrite(LED_VERDE, LOW);
+  pinMode(LED_VERMELHO, OUTPUT);
+  digitalWrite(LED_VERMELHO, LOW);
   //---------------------------------------
   //    LOG
   //---------------------------------------
@@ -228,13 +241,14 @@ void setup() {
   //checkOST();
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
-  gravarArquivo(" \n\n ******************************* \n ****** INICIANDO CENTRAL ***** \n ******************************* ", "log.txt");
+  gravarArquivo(" \n\n ******************************* \n ****** INICIANDO CENTRAL ***** \n *******************************\n "+VERSAO, "log.txt");
 }
 
 void loop() {
   ArduinoOTA.handle();
   WiFiManager wifiManager;
   WiFiClient client = server.available();
+  pisca_led(LED_VERDE,true);
 	while(!timeClient.update()) 
 	{
     timeClient.getFormattedDate(5);
@@ -819,9 +833,12 @@ void loop() {
     if (GLP >= LIMITE_MQ2)
     {
       sirene(true);
+      pisca_led(LED_VERDE,false);
+      pisca_led(LED_VERMELHO,true);
     } else
     {
       sirene(false);
+      pisca_led(LED_VERMELHO,false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
     if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2))

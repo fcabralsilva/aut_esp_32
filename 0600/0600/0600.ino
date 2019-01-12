@@ -249,10 +249,10 @@ void loop() {
   WiFiManager wifiManager;
   WiFiClient client = server.available();
   pisca_led(LED_VERDE,true);
-	while(!timeClient.update()) 
-	{
-    timeClient.getFormattedDate(5);
-  }
+	//timeClient.update();
+//	{
+//    timeClient.getFormattedDate(5);
+//  }
   formattedDate = timeClient.getFormattedDate();
 	int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(0, splitT); //https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
@@ -685,7 +685,6 @@ void loop() {
       stringUrl = i.substring(0, final_s - 1);
       gravaLog(" "+hora_ntp+" - Novos parâmetros I/O gravado na Central", logtxt, 2);
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl)+ "\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl)+ "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl)+ "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl)+ "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\"}", "param.txt");
-      //closeFS();
       cont_ip_banco = 0;
     }
     if (requisicao == "00013") // APAGAR ARQUIVO DE LOG

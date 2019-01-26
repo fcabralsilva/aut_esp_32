@@ -1,4 +1,4 @@
-String VERSAO = "V0605 - 05/01/2019";
+String VERSAO = "V0607 - 19/01/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -33,11 +33,11 @@ String VERSAO = "V0605 - 05/01/2019";
 #define GAS_LPG               0
 #define GAS_CO                1
 #define SMOKE                 2
+
 //---------------------------------------
 #define LED_AZUL              2
 #define LED_VERDE             4
 #define LED_VERMELHO          16
-//int value = LOW;                // último valor do LED
 long milis = 0;        // último momento que o LED foi atualizado
 long interval = 250;           // tempo de transição entre estados (milisegundos)
 //---------------------------------------
@@ -84,11 +84,10 @@ const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao;
 const int PIN_AP = 3;
 char portaServidor = 80, contarParaGravar2 = 0 ;
-int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0,sensorMq2 = 0, contadorPorta = 0, LED_BUILTIN = 2, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_C = 5 , MEM_EEPROM_1 = 7, MEM_EEPROM_2 = 9, MEM_EEPROM_3 = 12, MEM_EEPROM_4 = 14, MEM_EEPROM_MQ2 = 20;
+int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0,sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
 unsigned long time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 10000;
 IPAddress ipHost;
-boolean ultimoStatus = 0, atualStatus = 0 ;
 WiFiUDP ntpUDP;
 int16_t utc = -2; //UTC -3:00 Brazil
 uint32_t currentMillis = 0;
@@ -130,9 +129,6 @@ void setup() {
  
   delay(2000);
   pinMode(PIN_AP, INPUT_PULLUP);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
 
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
@@ -237,7 +233,6 @@ void setup() {
   retorno = "SERVIDOR_CONECT";
   timeClient.begin();
   timeClient.setTimeOffset(-7200);
- 
   //checkOST();
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
@@ -249,14 +244,11 @@ void loop() {
   WiFiManager wifiManager;
   WiFiClient client = server.available();
   pisca_led(LED_VERDE,true);
-	//timeClient.update();
-//	{
-//    timeClient.getFormattedDate(5);
-//  }
+	timeClient.update();
   formattedDate = timeClient.getFormattedDate();
 	int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(0, splitT); //https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
-  hora_ntp   = dayStamp + "-"+timeClient.getFormattedTime(); 
+  hora_ntp   = dayStamp + " "+timeClient.getFormattedTime(); 
   //hora_ntp = "00000";
   while (cont_ip_banco < 1)
   { 
@@ -303,6 +295,7 @@ void loop() {
     verao = root["verao"];
     gravaLog(" "+hora_ntp + "   Grava Log : "+String(conslog)+ " Nivel: " + String(nivelLog)+" Horario de Verão: " + String(verao), logtxt, 1);
     Serial.println("");
+    
     cont_ip_banco++;
 }
   //se o botão foi pressionado, reseta as configurações WIFI da central
@@ -322,8 +315,8 @@ void loop() {
       delay(1000);
     }
     Serial.println(" Central em modo de configuração do WIFI...");
-  }
 
+  }
   //---------------------------------------
   //    ENTRADA E SAIDA 1
   //---------------------------------------

@@ -1,86 +1,3 @@
-void portaIO(int entrada, int rele, const char* tipo,const char* modelo,char contador, boolean estado){
-	String s_tipo_1 = String(tipo);
-	String s_modelo_1 = String(modelo);
-	if (s_modelo_1 == "pulso")
-	{
-		if (digitalRead(entrada) == s_tipo_1.toInt())
-		{
-			if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo pulso... ");
-			while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
-			{
-				if (millis() >= tempo + paramTempo)
-				{
-					contador++;
-					nContar++;
-					Serial.print(contador, DEC);
-					tempo = millis();
-				}
-			}
-		}
-	} else if (s_modelo_1 == "interruptor")
-	{
-
-		estado_atual = digitalRead(entrada);
-		if (estado_atual != estado_antes )
-		{
-			if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo interruptor... ");
-			estado_antes = estado_atual;
-			contador = 3;
-			Serial.print(contador, DEC);
-		}
-	}
-	if ((contador >= 2) && (contador <= 9))
-	{
-		if (nContar >= 300)
-		{
-			
-			if(n == 0)
-			{
-				for(int i = 0; i <=0 ;i++ )
-				{
-					String ERRO_ENTRADA =" - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
-					//Gravando log de erro na central.
-					gravaLog(" "+hora_ntp + "   Grava Log : "+ERRO_ENTRADA, logtxt, 2);
-					n = 1;
-				}
-			}
-		} else
-		{
-			String ERRO_ENTRADA = "0";
-			nContar = 0;
-			if (estado == false) {
-				Serial.println(" Ligando Porta "+String(entrada)+" : " + String(rele));
-				estado = true;
-				contador = 0;
-				acionaPorta(rele, "", "liga");
-			} else {
-				Serial.println(" Desligar Porta "+String(entrada)+" : " + String(rele));
-				acionaPorta(rele, "", "desl");
-				estado = false;
-				contador = 0;
-			}
-		}
-	}
-
-}
-
-const char* abreJson(const char* json, const char* etiqueta  )
-{
-	DynamicJsonDocument doc;
-	const char* servidor;
-	DeserializationError error = deserializeJson(doc, json);
-	if (error)
-	{
-		Serial.print(F(" ERRO 0101 - Falha ao desenraizar o arquivo json: "));
-		Serial.println(error.c_str());
-		
-	}
-	JsonObject root = doc.as<JsonObject>();
-	servidor       = root[etiqueta];
-	root.end();
-	return servidor;
-}
-
 void pisca_led(int LED,boolean estado)
 {
   if(estado == true)
@@ -186,14 +103,14 @@ void gravarBanco (String buffer){
 		gravaLog(" "+hora_ntp + " - ERRO 0105 - Não foi possivel conectar ao servidor WEB ou banco de dados, reiniciando a central!", logtxt, 1);
 		WiFi.reconnect();
 		if(WiFi.status() != WL_CONNECTED){
-      pisca_led(LED_VERDE,false);
-      pisca_led(LED_VERMELHO,true);
+			pisca_led(LED_VERDE,false);
+			pisca_led(LED_VERMELHO,true);
 			gravaLog(" "+hora_ntp + " - Falha ao conectar ao WIFI e atingir o tempo limite", logtxt, 1);
 			//ESP.restart();
 			delay(1000);
 		} 
 	}
-  pisca_led(LED_VERMELHO,false);
+	pisca_led(LED_VERMELHO,false);
 	if ((client.connect(servidor, portaServidor) == true) && (teste_conexao() == "SERVIDOR_CONECT")) 
 	{
 		//if (client.connect(servidor, 80)) {
@@ -250,14 +167,14 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
 {
 	int i;
 	float valor=0;
-  pisca_led(LED_VERDE,false);
+	pisca_led(LED_VERDE,false);
 	for (i=0;i<ITERACOES_CALIBRACAO;i++) {    //sao adquiridas diversas amostras e calculada a media para diminuir o efeito de possiveis oscilacoes durante a calibracao
 		Serial.print(".");
 		valor += calcularResistencia(analogRead(mq_pin));
 		delay(500);
-		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));//Faz o LED piscar (inverte o estado).
+		digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));//Faz o LED piscar (inverte o estado).
 	}
-  digitalWrite(LED_AZUL,false);
+	digitalWrite(LED_AZUL,false);
 	valor = valor/ITERACOES_CALIBRACAO;        
 	valor = valor/RO_FATOR_AR_LIMPO; //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
 	return valor; 
@@ -266,13 +183,13 @@ float leitura_MQ2(int mq_pin)
 {
 	int i;
 	float rs=0;
-  pisca_led(LED_VERDE,false);
+	pisca_led(LED_VERDE,false);
 	for (i=0;i<ITERACOES_LEITURA;i++) {
 		rs += calcularResistencia(analogRead(mq_pin));
-		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));//Faz o LED piscar (inverte o estado).
+		digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));//Faz o LED piscar (inverte o estado).
 		delay(10);
 	}
-  digitalWrite(LED_AZUL,false);
+	digitalWrite(LED_AZUL,false);
 	rs = rs/ITERACOES_LEITURA;
 	return rs;  
 }

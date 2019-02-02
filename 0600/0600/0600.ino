@@ -1,4 +1,4 @@
-String VERSAO = "V0607 - 19/01/2019";
+String VERSAO = "V0701 - 02/02/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -19,6 +19,8 @@ String VERSAO = "V0607 - 19/01/2019";
 #include <FS.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
+#include <Alarme.h>
+
 //---------------------------------------
 //    DEFINIÇÕES DE VARIAVEIS FIXAS
 //---------------------------------------
@@ -82,7 +84,7 @@ struct botao4 {
 String ipLocalString, buff, URL, linha, GLP,FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf;
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao;
-const int PIN_AP = 3;
+const int PIN_AP = 3, i_sensor_alarme = 17,i_sirene_alarme = 18;
 char portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0,sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
@@ -111,6 +113,7 @@ float Ro = 10;
 String formattedDate;
 String dayStamp;
 String timeStamp;
+boolean b_status_alarme = 0;
 //---------------------------------------
 
 //---------------------------------------
@@ -118,6 +121,7 @@ String timeStamp;
 //---------------------------------------
 DHT dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
+Alarme alarme;
 //---------------------------------------
 //const char* ssid = "redeb";
 //const char* password = "!g@t0pret0203154121";
@@ -157,6 +161,8 @@ void setup() {
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
   digitalWrite(LED_VERMELHO, LOW);
+  alarme.sensores(i_sensor_alarme);
+  alarme.sirene(i_sirene_alarme);
   //---------------------------------------
   //    LOG
   //---------------------------------------
@@ -297,7 +303,8 @@ void loop() {
     Serial.println("");
     
     cont_ip_banco++;
-}
+  }
+  
   //se o botão foi pressionado, reseta as configurações WIFI da central
   if ( digitalRead(PIN_AP) == LOW )
   {
@@ -700,10 +707,18 @@ void loop() {
     {
       botao1.contador = 31;
     }
-	if (requisicao == "00016") // APLICAR AS CONFIGURAÇÕES, FAZER NOVA LEITURA DO JSON
+    if (requisicao == "00016") // APLICAR AS CONFIGURAÇÕES, FAZER NOVA LEITURA DO JSON
     {
       cont_ip_banco = 0;
     }
+    if (requisicao == "00117")
+    {
+      b_status_alarme = 1;
+    }else if (requisicao == "00017")
+    {
+      b_status_alarme = 0;
+      alarme.desligado(i_sirene_alarme);
+      }
     //---------------------------------------
     //    PAGINA WEB DA CENTRAL - ARQUIVO WEB.INO
     //---------------------------------------
@@ -757,7 +772,14 @@ void loop() {
       buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao4.nomeInter) + "</button></a>";
     }
     buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
-    buf += "</p></div></div>";
+    buf += "</p>";
+    if(b_status_alarme == 0)
+    {
+      buf += "<a href=\"?00117\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-success\">Ligar Alarme</button></a>";
+    }else{
+      buf += "<a href=\"?00017\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Alarme</button></a>";
+    }
+    buf += "</div></div>";
     buf += "<div class=\"tab-pane fade\" id=\"pills-profile\" role=\"tabpanel\" aria-labelledby=\"pills-profile-tab\">";
     buf += "<h4>Configurar Sensor</h4>";
     buf += "<form class=\"form-group\" method=\"get\"><table class=\"table-responsive\" style=\"width:100%\"><tr><td><input type=\"hidden\" name=\"cod\" value=\"00011\"><label for=\"inputEmail4\">Limite Sensor Gás: </label></td><td><input class=\"form-control mb-2\" style=\"width:50px\" type=\"text\" placeholder=\"\" name=\"valor\" value=\"" + String(LIMITE_MQ2) + "\"></td><td> <input class=\"btn btn-info\" type=\"submit\" value=\"Alterar\"><a href=\"?00010\"></td><td><button class=\"btn btn-warning\" type=\"button\"  >Recalibrar</button></a></td></tr></table></form>";
@@ -798,6 +820,12 @@ void loop() {
     client.flush();
     client.stop();
   }
+  /*
+   *ALARME 
+   */
+  alarme.monitoramento(i_sensor_alarme,i_sirene_alarme,b_status_alarme);
+  
+  
   //---------------------------------------
   //    ROTINA DO SENSOR MQ-2
   //---------------------------------------

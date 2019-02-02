@@ -1,4 +1,4 @@
-String VERSAO = "V0701 - 02/02/2019";
+String VERSAO = "V0702 - 02/02/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -324,253 +324,25 @@ void loop() {
     Serial.println(" Central em modo de configuração do WIFI...");
 
   }
-  //---------------------------------------
+   //---------------------------------------
   //    ENTRADA E SAIDA 1
   //---------------------------------------
-  String s_tipo_1 = String(botao1.tipo);
-  String s_modelo_1 = String(botao1.modelo);
-  if (s_modelo_1 == "pulso")
-  {
-    if (digitalRead(botao1.entrada) == s_tipo_1.toInt())
-    {
-      if (nContar == 0)Serial.println("\n");Serial.println("\n Entrada 1 - Modo pulso... ");
-      while ((digitalRead(botao1.entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          botao1.contador++;
-          nContar++;
-          Serial.print(botao1.contador, DEC);
-          tempo = millis();
-        }
-      }
-    }
-  } else if (s_modelo_1 == "interruptor")
-  {
-
-    botao1.estado_atual = digitalRead(botao1.entrada);
-    if (botao1.estado_atual != botao1.estado_antes )
-    {
-      if (nContar == 0)Serial.println(" Entrada 1 - Modo interruptor... ");
-      botao1.estado_antes = botao1.estado_atual;
-      botao1.contador = 3;
-      //Serial.print(botao1.contador, DEC);
-    }
-  }
-  if ((botao1.contador >= 2) && (botao1.contador <= 9))
-  {
-    if (nContar >= 100)
-    {
-      
-      if(n == 0)
-      {
-        for(int i = 0; i <=0 ;i++ )
-        {
-          String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor 1 (Porta IN: "+botao1.rele+" Porta OUT: "+botao1.entrada+") com erro de execução, deve usar a pagina para reiniciar";
-          //Gravando log de erro na central.
-          if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
-          n = 1;
-        }
-      }
-    } else
-    {
-      String ERRO_ENTRADA = "0";
-      nContar = 0;
-      if (botao1.estado == false) {
-        Serial.println(" Ligando Porta (rele 1): " + String(botao1.rele));
-        botao1.estado = true;
-        botao1.contador = 0;
-        acionaPorta(botao1.rele, "", "liga");
-      } else {
-        Serial.println(" Desligar Porta (rele 1): " + String(botao1.rele));
-        acionaPorta(botao1.rele, "", "desl");
-        botao1.estado = false;
-        botao1.contador = 0;
-      }
-    }
-  }
+  botao1.estado = portaIO(botao1.entrada, botao1.rele, botao1.tipo,botao1.modelo,botao1.contador, botao1.estado);
   //---------------------------------------
-
   //---------------------------------------
   //    ENTRADA E SAIDA 2
   //---------------------------------------
-  String s_tipo_2 = String(botao2.tipo);
-  String s_modelo_2 = String(botao2.modelo);
-  if (s_modelo_2 == "pulso")
-  {
-    if (digitalRead(botao2.entrada) == s_tipo_2.toInt())
-    {
-      if (nContar == 0)Serial.println(" Entrada 2 - Modo pulso... ");
-      while ((digitalRead(botao2.entrada) == s_tipo_2.toInt()) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          botao2.contador++;
-          nContar++;
-          Serial.print(botao2.contador, DEC);
-          tempo = millis();
-        }
-      }
-    }
-  } else if (s_modelo_2 == "interruptor")
-  {
-    botao2.estado_atual = digitalRead(botao2.entrada);
-    if (botao2.estado_atual != botao2.estado_antes )
-    {
-      if (nContar == 0)Serial.println(" Entrada 2 - Modo interruptor... ");
-      botao2.estado_antes = botao2.estado_atual;
-      botao2.contador = 3;
-      //Serial.print(botao2.contador, DEC);
-    }
-  }
-  if ((botao2.contador >= 2) && (botao2.contador <= 9))
-  {
-    if (nContar >= 100)
-    {
-      for(int i = 0; i <=0 ;i++ )
-      {
-        String ERRO_ENTRADA = " ERRO 0107 - Botão 2 com erro de execução, reiniciar central";
-        //Gravando log de erro na central.
-        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 2 com erro de execução, reiniciar central", "log.txt");
-      }
-    } else
-    {
-      String ERRO_ENTRADA = "0";
-      nContar = 0;
-      if (botao2.estado == false) {
-        Serial.println(" Ligando Porta (rele 2): " + String(botao2.rele));
-        botao2.estado = true;
-        botao2.contador = 0;
-        acionaPorta(botao2.rele, "", "liga");
-      } else {
-        Serial.println(" Desligar Porta (rele 2): " + String(botao2.rele));
-        acionaPorta(botao2.rele, "", "desl");
-        botao2.estado = false;
-        botao2.contador = 0;
-      }
-    }
-  }
+  botao2.estado = portaIO(botao2.entrada, botao2.rele, botao2.tipo,botao2.modelo,botao2.contador, botao2.estado);
   //---------------------------------------
-
   //---------------------------------------
   //    ENTRADA E SAIDA 3
   //---------------------------------------
-  String s_tipo_3 = String(botao3.tipo);
-  String s_modelo_3 = String(botao3.modelo);
-  if (s_modelo_3 == "pulso")
-  {
-    if (digitalRead(botao3.entrada) == s_tipo_3.toInt())
-    {
-      if (nContar == 0)Serial.println(" Entrada 3 - Modo pulso... ");
-      while ((digitalRead(botao3.entrada) == s_tipo_3.toInt()) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          botao3.contador++;
-          nContar++;
-          Serial.print(botao3.contador, DEC);
-          tempo = millis();
-        }
-      }
-    }
-  } else if (s_modelo_3 == "interruptor")
-  {
-    botao3.estado_atual = digitalRead(botao3.entrada);
-    if (botao3.estado_atual != botao3.estado_antes )
-    {
-      if (nContar == 0)Serial.print(" Entrada 3 - Modo interruptor... ");
-      botao3.estado_antes = botao3.estado_atual;
-      botao3.contador = 3;
-      //Serial.print(botao3.contador, DEC);
-    }
-  }
-  if ((botao3.contador >= 2) && (botao3.contador <= 9))
-  {
-    if (nContar >= 100)
-    {
-      for(int i = 0; i <=0 ;i++ )
-      {
-        String ERRO_ENTRADA = " ERRO 0107 - Botão 3 com erro de execução, reiniciar central";
-        //Gravando log de erro na central.
-        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 3 com erro de execução, reiniciar central", "log.txt");
-      } 
-    } else
-    {
-      String ERRO_ENTRADA = "0";
-      nContar = 0;
-      if (botao3.estado == false) {
-        Serial.println(" Ligando Porta (rele 3): " + String(botao3.rele));
-        botao3.estado = true;
-        botao3.contador = 0;
-        acionaPorta(botao3.rele, "", "liga");
-      } else {
-        Serial.println(" Desligar Porta (rele 3): " + String(botao3.rele));
-        acionaPorta(botao3.rele, "", "desl");
-        botao3.estado = false;
-        botao3.contador = 0;
-      }
-    }
-  }
+  botao3.estado = portaIO(botao3.entrada, botao3.rele, botao3.tipo,botao3.modelo,botao3.contador, botao3.estado);
   //---------------------------------------
   //---------------------------------------
   //    ENTRADA E SAIDA 4
   //---------------------------------------
-  String s_tipo_4 = String(botao4.tipo);
-  String s_modelo_4 = String(botao4.modelo);
-  if (s_modelo_4 == "pulso")
-  {
-    if (digitalRead(botao4.entrada) == s_tipo_4.toInt())
-    {
-      if (nContar == 0)Serial.println("\n");Serial.println("\n Entrada 4 - Modo pulso... ");
-      while ((digitalRead(botao4.entrada) == s_tipo_4.toInt()) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          botao4.contador++;
-          nContar++;
-          Serial.print(botao4.contador, DEC);
-          tempo = millis();
-        }
-      }
-    }
-  } else if (s_modelo_4 == "interruptor")
-  {
-
-    botao4.estado_atual = digitalRead(botao4.entrada);
-    if (botao4.estado_atual != botao4.estado_antes )
-    {
-      if (nContar == 0)Serial.println(" Entrada 4 - Modo interruptor... ");
-      botao4.estado_antes = botao4.estado_atual;
-      botao4.contador = 3;
-      //Serial.print(botao4.contador, DEC);
-    }
-  }
-  if ((botao4.contador >= 2) && (botao4.contador <= 9))
-  {
-    if (nContar >= 100)
-    {
-      for(int i = 0; i <=0 ;i++ )
-      {
-        String ERRO_ENTRADA = " ERRO 0107 - Botão 4 com erro de execução, reiniciar central";
-        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 4 com erro de execução, reiniciar central", "log.txt");
-      }
-    } else
-    {
-      String ERRO_ENTRADA = "0";
-      nContar = 0;
-      if (botao4.estado == false) {
-        Serial.println("\n Ligando Porta (rele 4): " + String(botao4.rele));
-        botao4.estado = true;
-        botao4.contador = 0;
-        acionaPorta(botao4.rele, "", "liga");
-      } else {
-        Serial.println("\n Desligar Porta (rele 4): " + String(botao4.rele));
-        acionaPorta(botao4.rele, "", "desl");
-        botao4.estado = false;
-        botao4.contador = 0;
-      }
-    }
-  }
+  botao4.estado = portaIO(botao4.entrada, botao4.rele, botao4.tipo,botao4.modelo,botao4.contador, botao4.estado);
   //---------------------------------------
   //---------------------------------------
   //    LIGAR E DESLIGAR TODOS RELES

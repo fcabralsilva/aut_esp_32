@@ -1,0 +1,504 @@
+<!--buf += "-->HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n
+<!DOCTYPE html>
+<html lang='pt-br'>
+<!--";-->
+/*HEAD*/
+<!--buf += "-->
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>
+    <!--";-->
+    /*STYLE CSS*/
+    <!--buf += "-->
+    <style type='text/css'>
+        body .form-control {
+            font-size: 12px
+        }
+        input,
+        button,
+        select,
+        optgroup,
+        textarea {
+            margin: 5px;
+        }
+        .table td,
+        .table th {
+            padding: 0px;
+        }
+        .th {
+            width: 100px;
+        }
+        .shadow-lg {
+            box-shadow: 0px
+        }
+    </style>
+    <!--";-->
+    /*HEAD_END*/
+    <!--buf += "-->
+    <title>Central Automação</title>
+</head>
+<body>
+    <!--";-->
+    /* DIV CONTAINER*/
+    <!--buf += "-->
+    <div class='container shadow-lg p-3 mb-5 bg-white rounded'>
+        <!--";-->
+        /*NAV_MENU*/
+        <!--buf += "-->
+        <ul class='nav nav-pills mb-3' id='pills-tab' role='tablist'>
+            <li class='nav-item'><a class='nav-link active' id='pills-home-tab' data-toggle='pill' href='#pills-home' role='tab' aria-controls='pills-home' aria-selected='true'>Home</a></li>
+            <li class='nav-item'><a class='nav-link' id='pills-profile-tab' data-toggle='pill' href='#pills-profile' role='tab' aria-controls='pills-profile' aria-selected='false'>Configuração</a></li>
+            <li class='nav-item'><a class='nav-link' id='pills-contact-tab' data-toggle='pill' href='#pills-contact' role='tab' aria-controls='pills-contact' aria-selected='false'>Contato</a></li>
+        </ul>
+        <!--";-->
+        /*DIV PRINCIPAL*/
+        <!--buf += "-->
+        <div class='tab-content' id='pills-tabContent'>
+            <!--";-->
+            <!--buf += "-->
+            <div class='tab-pane fade show active' id='pills-home' role='tabpanel' aria-labelledby='pills-home-tab'>
+                <!--";-->
+                <!--buf += "-->
+                <h4><a href='http://" + ipLocalString + "'>CENTRAL -" + ipLocalString + "</a></h4>
+                <!--";-->
+                <!--buf += "-->
+                <p style='text-align:right'><span class='badge badge-pill badge-primary'>Versão: " + VERSAO + "</span></span>
+                </p>
+                <!--";-->
+                /*TABLELA_SENSORES*/
+                <!--buf += "-->
+                <table class='table table-sm'>
+                    <!--";-->
+                    <!--buf += "-->
+                    <thead class='thead-light'>
+                        <tr>
+                            <th>SENSOR</th>
+                            <th>TIPO</th>
+                            <th>VALOR</th>
+                        </tr>
+                    </thead>
+                    <!--";-->
+                    <!--buf += "-->
+                    <tbody>
+                        <tr>
+                            <td>DHT11</td>
+                            <td>Temperatura/Umidade</td>
+                            <td>" + String(temperatura) + "Cº / " + String(umidade) + "%</td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>MQ2</td>
+                            <td>Gás</td>
+                            <td>" + GLP + " PPM / " + String(sensorMq2) + "</td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>MQ2</td>
+                            <td>Fumaça</td>
+                            <td>" + FUMACA + " PPM / " + String(sensorMq2) + "</td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    <!--";-->
+                    <!--buf += "-->
+                </table>
+                <!--";-->
+                /*BOTOES_INPUT*/
+                <!--buf += "-->
+                <div>
+                    <p>
+                        <!--";-->
+                        if (botao1.estado == true) {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao1.rele) + "&acao=desliga&central=" + ipLocalString + "' title='Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "'>
+                            <button type='button' class='btn btn-success'>" + String(botao1.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } else {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao1.rele) + "&acao=liga&central=" + ipLocalString + "' title='Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "'>
+                            <button type='button' class='btn btn-danger'>" + String(botao1.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } if (botao2.estado == true) {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao2.rele) + "&acao=desliga&central=" + ipLocalString + "' title='Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "'>
+                            <button type='button' class='btn btn-success'>" + String(botao2.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } else {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao2.rele) + "&acao=liga&central=" + ipLocalString + "' title='Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "'>
+                            <button type='button' class='btn btn-danger'>" + String(botao2.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } if (botao3.estado == true) {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao3.rele) + "&acao=desliga&central=" + ipLocalString + "' title='Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "'>
+                            <button type='button' class='btn btn-success'>" + String(botao3.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } else {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao3.rele) + "&acao=liga&central=" + ipLocalString + "' title='Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "'>
+                            <button type='button' class='btn btn-danger'>" + String(botao3.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } if (botao4.estado == true) {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao4.rele) + "&acao=desliga&central=" + ipLocalString + "' title='Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "'>
+                            <button type='button' class='btn btn-success'>" + String(botao4.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        } else {
+                        <!--buf += "-->
+                        <a href='?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "' title='Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "'>
+                            <button type='button' class='btn btn-danger'>" + String(botao4.nomeInter) + "</button>
+                        </a>
+                        <!--";-->
+                        }
+                        <!--buf += "-->
+                        <a href='?00015' title='Desligar'>
+                            <button type='button' class='btn btn-danger'>Desli. Tudo</button>
+                        </a>
+                        <!--";-->
+                        <!--buf += "-->
+                    </p>
+                    <!--";-->
+                    /* BOTOES_ALARME */ if(b_status_alarme == 0) {
+                    <!--buf += "-->
+                    <tr>
+                        <td>
+                            <a href='?00117' title='Desligar'>
+                                <button type='button' class='btn btn-success'>Ligar Alarme</button>
+                            </a>
+                        </td>
+                    </tr>
+                    <!--";-->
+                    }else{
+                    <!--buf += "-->
+                    <tr>
+                        <td>
+                            <div class='accordion' id='accordionExample'>
+                                <button class='btn btn-danger' type='button' data-toggle='collapse' data-target='#collapseTwo' aria-expanded='false' aria-controls='collapseTwo'> Desli. Alarme </button>
+                                <div id='collapseTwo' class='collapse' aria-labelledby='headingTwo' data-parent='#accordionExample'>
+                                    <form name='calcform' method='post' action=''>
+                                        <fieldset>
+                                            <input type='password' name='visor' id='visor' />
+                                            <table id='calc'>
+                                                <tr>
+                                                    <td>
+                                                        <input type='button' name='num1' class='num' value='1' onclick='calcNum(1)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num2' class='num' value='2' onclick='calcNum(2)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num3' class='num' value='3' onclick='calcNum(3)' /> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type='button' name='num4' class='num' value='4' onclick='calcNum(4)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num5' class='num' value='5' onclick='calcNum(5)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num6' class='num' value='6' onclick='calcNum(6)' /> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type='button' name='num7' class='num' value='7' onclick='calcNum(7)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num8' class='num' value='8' onclick='calcNum(8)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num9' class='num' value='9' onclick='calcNum(9)' /> </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type='button' name='limpar' class='num' value='X' onclick='calcLimpar()' /> </td>
+                                                    <td>
+                                                        <input type='button' name='num0' class='num' value='0' onclick='calcNum(0)' /> </td>
+                                                    <td>
+                                                        <input type='button' name='igual' class='num' value='=' onclick='calcParse(' resultado ')' /> </td>
+                                                </tr>
+                                            </table>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!--";-->
+                    }
+                    <!--buf += "-->
+                </div>
+            </div>
+            <!--";-->
+            /*DIV CONFIGURAÇÕES*/
+            <!--buf += "-->
+            <div class='tab-pane fade' id='pills-profile' role='tabpanel' aria-labelledby='pills-profile-tab'>
+                <!--";-->
+                <!--buf += "-->
+                <h4>Configurar Sensor</h4>
+                <!--";-->
+                <!--buf += "-->
+                <form class='form-group' method='get'>
+                    <table class='table-responsive' style='width:100%'>
+                        <tr>
+                            <td>
+                                <input type='hidden' name='cod' value='00011'>
+                                <label for='inputEmail4'>Limite Sensor Gás: </label>
+                            </td>
+                            <td>
+                                <input class='form-control mb-2' style='width:50px' type='text' placeholder='' name='valor' value='" + String(LIMITE_MQ2) + "'>
+                            </td>
+                            <td>
+                                <input class='btn btn-info' type='submit' value='Alterar'>
+                                <a href='?00010'></td>
+                            <td>
+                                <button class='btn btn-warning' type='button'>Recalibrar</button>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <!--";-->
+                <!--buf += "-->
+                <h4>Parâmetros Gerais</h4>
+                <!--";-->
+                <!--buf += "-->
+                <form class='form-group' action='?00012'>
+                    <table class='table-responsive'>
+                        <input type='hidden' name='cod' value='00012'>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>
+                                <label for='inputEmail4'>Servidor</label>
+                            </td>
+                            <td colspan='3'>
+                                <input class='form-control mb-2' style='width:130px' type='text' placeholder='' name='servidor' value='" + serv + "'>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <label for='inputEmail4'>Interruptor 1</label>
+                            </td>
+                            <td>
+                                <input class='form-control mb-2' style='width:100%x' type='text' placeholder='' name='int_1' value='" + String(botao1.nomeInter) + "'>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='tipo_1'>
+                                    <option value='0' " + selectedHTNL(botao1.tipo, "0 ") + "> Negativo</option>
+                                    <option value='1' " + selectedHTNL(botao1.tipo, "1 ") + "> Positivo</option>
+                                </select>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='sinal_1'>
+                                    <option value='pulso' "+selectedHTNL(botao1.modelo, "pulso ")+"> Pulso</option>
+                                    <option value='interruptor' "+selectedHTNL(botao1.modelo, "interruptor ")+">Interruptor</option>
+                                    <option value='pir' "+selectedHTNL(botao1.modelo, "pir ")+">PIR</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>
+                                <label for='inputEmail4'>Interruptor 2</label>
+                            </td>
+                            <td>
+                                <input class='form-control mb-2' style='width:100%x' type='text' placeholder='' name='int_2' value='" + String(botao2.nomeInter) + "'>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='tipo_2'>
+                                    <option value='0' " + selectedHTNL(botao2.tipo, "0 ") + "> Negativo</option>
+                                    <option value='1' " + selectedHTNL(botao2.tipo, "1 ") + "> Positivo</option>
+                                </select>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='sinal_2'>
+                                    <option value='pulso' "+selectedHTNL(botao2.modelo, "pulso ")+"> Pulso</option>
+                                    <option value='interruptor' "+selectedHTNL(botao2.modelo, "interruptor ")+">Interruptor</option>
+                                    <option value='pir' "+selectedHTNL(botao2.modelo, "pir ")+">PIR</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>
+                                <label for='inputEmail4'>Interruptor 3</label>
+                            </td>
+                            <td>
+                                <input class='form-control mb-2' style='width:100%x' type='text' placeholder='' name='int_3' value='" + String(botao3.nomeInter) + "'>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='tipo_3'>
+                                    <option value='0' " + selectedHTNL(botao3.tipo, "0 ") + "> Negativo</option>
+                                    <option value='1' " + selectedHTNL(botao3.tipo, "1 ")+ "> Positivo</option>
+                                </select>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='sinal_3'>
+                                    <option value='pulso' "+selectedHTNL(botao3.modelo, "pulso ")+"> Pulso</option>
+                                    <option value='interruptor' "+selectedHTNL(botao3.modelo, "interruptor ")+">Interruptor</option>
+                                    <option value='pir' "+selectedHTNL(botao3.modelo, "pir ")+">PIR</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                        <tr>
+                            <td>
+                                <label for='inputEmail4'>Interruptor 4</label>
+                            </td>
+                            <td>
+                                <input class='form-control mb-2' style='width:100%x' type='text' placeholder='' name='int_4' value='" + String(botao4.nomeInter) + "'>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='tipo_4'>
+                                    <option value='0' " + selectedHTNL(botao4.tipo, "0 ") + "> Negativo</option>
+                                    <option value='1' " + selectedHTNL(botao4.tipo, "1 ") + "> Positivo</option>
+                                </select>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='sinal_4'>
+                                    <option value='pulso' " + selectedHTNL(botao4.modelo, "pulso ")+ "> Pulso</option>
+                                    <option value='interruptor' " + selectedHTNL(botao4.modelo, "interruptor ") + ">Interruptor</option>
+                                    <option value='pir' "+selectedHTNL(botao4.modelo, "pir ")+">PIR</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        // Config de log
+                        <!--buf += "-->
+                        <tr>
+                            <td>
+                                <label for='inputEmail4'>Registro de log</label>
+                            </td>
+                            <!--";-->
+                            <!--buf += "-->
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='log'>
+                                    <option value='sim' "+selectedHTNL(conslog, "sim ")+"> Sim</option>
+                                    <option value='nao' "+selectedHTNL(conslog, "nao ")+">Não</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class='form-control mb-2' style='width:100%x' name='nivel' title='Nível do log'>
+                                    <option value='1' "+selectedHTNL(nivelLog, "1 ")+">1</option>
+                                    <option value='2' "+selectedHTNL(nivelLog, "2 ")+">2</option>
+                                    <option value='3' "+selectedHTNL(nivelLog, "3 ")+">3</option>
+                                    <option value='4' "+selectedHTNL(nivelLog, "4 ")+">4</option>
+                                </select>
+                            </td>
+                            <td><input class='btn btn-info' type='submit' value='Salvar'></td>
+                        </tr>
+                        <!--";-->
+                        // Botao Salvar Config
+                        <!--buf += "-->
+                        <tr>
+                            <td>                                
+															<a href='?00013' title='Apagar log'><button type='button' class='btn btn-danger'>Deletar Log</button></td>
+                            <td>
+															<button class='btn btn-primary' type='button' data-toggle='collapse' data-target='#collapseExample' aria-expanded='false' aria-controls='collapseExample'>Ver Logs </button></td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <!--";-->
+                        <!--buf += "-->
+                    </table>
+                </form>
+                <!--";-->
+                <!--buf += "-->
+                <div class='collapse' id='collapseExample'>
+                    <div class='card card-body'>
+                        <!--";-->
+                        buf += lerArquivo();
+                        <!--buf += "-->
+                    </div>
+                    <!--";-->
+                    <!--buf += "-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--";-->
+    <!--buf += "-->
+    <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo' crossorigin='anonymous'></script>
+    <!--";-->
+    <!--buf += "-->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js' integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49' crossorigin='anonymous'></script>
+    <!--";-->
+    <!--buf += "-->
+    <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js' integrity='sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy' crossorigin='anonymous'></script>
+    <!--";-->
+    <!--buf += "-->
+</body>
+</html>
+<!--";-->
+<!--buf += "-->
+<script>
+    function calcNum(num) {
+        document.calcform.visor.type = 'password';
+        document.calcform.visor.value = document.calcform.visor.value + num;
+    }
+    var delay = 1500;
+    function calcParse(oper) {
+        var valor = document.calcform.visor.value;
+        if (valor == '') {
+            document.calcform.visor.value = '';
+        } else {
+            var senha = '"+String(s_senha_alarme)+"';
+            document.calcform.visor.type = 'text';
+            if (senha == valor) {
+                document.calcform.visor.value = 'Senha Correta       ';
+                window.location.href = '?00017';
+                valor = '';
+            } else {
+                document.calcform.visor.value = 'Senha Incorreta      ';
+                valor = '';
+                setTimeout(function() {
+                    calcLimpar();
+                }, delay);
+            }
+        }
+    }
+    function calcLimpar() {
+        document.calcform.visor.value = '';
+    }
+</script>
+<!--";-->
+<!--buf += "-->
+</body>
+</html>
+<!--";-->

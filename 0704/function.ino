@@ -1,81 +1,81 @@
-boolean portaIO(int entrada, int rele, const char* tipo,const char* modelo,char contador, boolean estado){
-  String s_tipo_1 = String(tipo);
-  String s_modelo_1 = String(modelo);
-  estado_antes = estado;
-  if (s_modelo_1 == "pulso")
-  {
-
-    if (digitalRead(entrada) == s_tipo_1.toInt())
-    {
-      if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo pulso... ");
-      while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 100) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          contador++;
-          nContar++;
-          Serial.print(contador, DEC);
-          tempo = millis();
-        }
-      }
-    if( estado_antes == true) 
-    {
-      estado_atual = false;
-    }else if( estado_antes == false) 
-    {
-      estado_atual = true;
-    }
-    
-    }
-  } else if (s_modelo_1 == "interruptor")
-  {
-
-    estado_atual = digitalRead(entrada);
-    if (estado_atual != estado_antes )
-    {
-      if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo interruptor... ");
-      //estado_antes = estado_atual;
-      contador = 3;
-      Serial.print(contador, DEC);
-    }
-  }
-  if ((contador >= 2) && (contador <= 9))
-  {
-    if (nContar >= 100)
-    {
-      
-    if(n == 0)
-    {
-      for(int i = 0; i <=0 ;i++ )
-      {
-        String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
-        //Gravando log de erro na central.
-        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
-        n = 1;
-      }
-    }
-  } else
-    {
-      String ERRO_ENTRADA = "0";
-      nContar = 0;
-    estado_antes = estado_atual;
-      if (estado_antes == false) {
-        Serial.println(" Ligando Porta "+String(entrada)+" : " + String(rele));
-        //estado_antes = true;
-        contador = 0;
-        acionaPorta(rele, "", "liga");
-      } else {
-        Serial.println(" Desligar Porta "+String(entrada)+" : " + String(rele));
-        acionaPorta(rele, "", "desl");
-        //estado_antes = false;
-        contador = 0;
-      }
-    
-    }
-  }
-  return estado_antes;
-
-}
+//boolean portaIO(int entrada, int rele, const char* tipo,const char* modelo,char contador, boolean estado){
+//  String s_tipo_1 = String(tipo);
+//  String s_modelo_1 = String(modelo);
+//  estado_antes = estado;
+//  if (s_modelo_1 == "pulso")
+//  {
+//
+//    if (digitalRead(entrada) == s_tipo_1.toInt())
+//    {
+//      if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo pulso... ");
+//      while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 100) )
+//      {
+//        if (millis() >= tempo + paramTempo)
+//        {
+//          contador++;
+//          nContar++;
+//          Serial.print(contador, DEC);
+//          tempo = millis();
+//        }
+//      }
+//    if( estado_antes == true) 
+//    {
+//      estado_atual = false;
+//    }else if( estado_antes == false) 
+//    {
+//      estado_atual = true;
+//    }
+//    
+//    }
+//  } else if (s_modelo_1 == "interruptor")
+//  {
+//
+//    estado_atual = digitalRead(entrada);
+//    if (estado_atual != estado_antes )
+//    {
+//      if (nContar == 0)Serial.println(" Entrada "+String(entrada)+" - Modo interruptor... ");
+//      //estado_antes = estado_atual;
+//      contador = 3;
+//      Serial.print(contador, DEC);
+//    }
+//  }
+//  if ((contador >= 2) && (contador <= 9))
+//  {
+//    if (nContar >= 100)
+//    {
+//      
+//    if(n == 0)
+//    {
+//      for(int i = 0; i <=0 ;i++ )
+//      {
+//        String ERRO_ENTRADA = hora_rtc + " - ERRO 0107 - Interruptor Porta IN: "+String(rele)+" Porta OUT: "+String(entrada)+" esta com erro de execução, deve usar a pagina para reiniciar";
+//        //Gravando log de erro na central.
+//        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
+//        n = 1;
+//      }
+//    }
+//  } else
+//    {
+//      String ERRO_ENTRADA = "0";
+//      nContar = 0;
+//    estado_antes = estado_atual;
+//      if (estado_antes == false) {
+//        Serial.println(" Ligando Porta "+String(entrada)+" : " + String(rele));
+//        //estado_antes = true;
+//        contador = 0;
+//        acionaPorta(rele, "", "liga");
+//      } else {
+//        Serial.println(" Desligar Porta "+String(entrada)+" : " + String(rele));
+//        acionaPorta(rele, "", "desl");
+//        //estado_antes = false;
+//        contador = 0;
+//      }
+//    
+//    }
+//  }
+//  return estado_antes;
+//
+//}
 void pisca_led(int LED,boolean estado)
 {
   if(estado == true)

@@ -1,30 +1,29 @@
-String VERSAO = "V0706 - 27/04/2019";
+String VERSAO = "V0708 - 01/05/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
-#include <WiFi.h>
 #include <BluetoothSerial.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
+//#include <ESPmDNS.h>
 #include <ArduinoOTA.h>
-#include <DNSServer.h>
-#include <WebServer.h>
-#include <WiFiManager.h>
+#include <Alarme.h>
+#include <ArduinoJson.h>
+//#include <DNSServer.h>
 #include <DHT.h>
 #include <EEPROM.h>
-#include <NTPClient.h>
-#include <WiFiUDP.h>
-#include <Update.h>
-#include <Wire.h>
-#include <SPIFFS.h>
 #include <FS.h>
-#include <ArduinoJson.h>
-#include <HTTPClient.h>
-#include <Alarme.h>
+//#include <HTTPClient.h>
+#include <NTPClient.h>
 #include <RCSwitch.h>
-#include "soc/soc.h"
+#include <SPIFFS.h>
+//#include <Update.h>
+//#include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 #include <Wire.h>
+#include <WiFi.h>
+#include <WiFiUDP.h>
+//#include <WiFiUdp.h>
+#include <WebServer.h>
+#include <WiFiManager.h>
 
 //---------------------------------------
 //    DEFINIÇÕES DE VARIAVEIS FIXAS
@@ -54,7 +53,7 @@ long interval = 250;           // tempo de transição entre estados (milisegund
 struct botao1 {
   int entrada = 32, rele = 33;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-  char contador = 0;
+  int contador = 0;
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
@@ -62,7 +61,7 @@ struct botao1 {
 struct botao2 {
   int entrada = 25, rele = 26;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-  char contador = 0;
+  int contador = 0;
   const char* modelo = "interruptor";
   const char* tipo = "0";
   const char* nomeInter = "Com2";
@@ -70,7 +69,7 @@ struct botao2 {
 struct botao3 {
   int entrada = 14, rele = 27;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-  char contador = 0;
+  int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com3";
@@ -78,7 +77,7 @@ struct botao3 {
 struct botao4 {
   int entrada = 12, rele = 13;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-  char contador = 0;
+  int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com4";
@@ -86,7 +85,7 @@ struct botao4 {
 struct botao5 {
   int entrada = 16, rele = 18;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-  char contador = 0;
+  int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com5";
@@ -99,16 +98,16 @@ String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "si
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 3, i_sensor_alarme = 17, i_sirene_alarme = 18;
-char portaServidor = 80, contarParaGravar2 = 0 ;
+int portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
 unsigned long time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 10000;
 IPAddress ipHost;
 WiFiUDP ntpUDP;
-int16_t utc = -2; //UTC -3:00 Brazil
+int16_t utc = -3; //UTC -3:00 Brazil
 uint32_t currentMillis = 0;
 uint32_t previousMillis = 0;
-NTPClient timeClient(ntpUDP, "a.ntp.br", utc * 3600, 60000);
+NTPClient timeClient(ntpUDP, "a.st1.ntp.br", -3 * 3600, 60000);
 float umidade = 0, temperatura = 0;
 float LPGCurve[3]  =  {2.3, 0.20, -0.47}; //curva LPG aproximada baseada na sensibilidade descrita no datasheet {x,y,deslocamento} baseada em dois pontos
 //p1: (log200, log1.6), p2: (log10000, log0.26)
@@ -256,7 +255,8 @@ void setup() {
   ArduinoOTA.begin();
   retorno = "SERVIDOR_CONECT";
   timeClient.begin();
-  timeClient.setTimeOffset(-7200);
+  timeClient.forceUpdate();
+  //timeClient.setTimeOffset(-6200);
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   gravarArquivo(" \n\n ******************************* \n *** INICIANDO CENTRAL *** \n *******************************\n " + VERSAO, "log.txt");
@@ -322,7 +322,7 @@ void loop() {
     verao = root["verao"];
     s_senha_alarme = root["senha_alarme"];
     gravaLog(" " + hora_ntp + "   Grava Log : " + String(conslog) + " Nivel: " + String(nivelLog) + " Horario de Verão: " + String(verao), logtxt, 1);
-    gravaLog(" " + hora_ntp + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
+    //gravaLog(" " + hora_ntp + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
     Serial.println("");
 
     cont_ip_banco++;

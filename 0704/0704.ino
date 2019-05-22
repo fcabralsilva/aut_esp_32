@@ -1,4 +1,4 @@
-String VERSAO = "V0708 - 01/05/2019";
+String VERSAO = "V0709 - 08/05/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -39,7 +39,7 @@ String VERSAO = "V0708 - 01/05/2019";
 #define GAS_LPG               0
 #define GAS_CO                1
 #define SMOKE                 2
-#define RF_RECEIVER           10
+#define RF_RECEIVER           35
 #define PCF8574_ADDR		(0x20)
 //---------------------------------------
 #define LED_AZUL              2

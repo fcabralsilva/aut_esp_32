@@ -1,4 +1,4 @@
-String VERSAO = "V0709 - 08/05/2019";
+String VERSAO = "V0710 - 25/05/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -193,6 +193,10 @@ void setup() {
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
+  IPAddress _ip = IPAddress(192, 168, 0, 20);
+  IPAddress _gw = IPAddress(192, 168, 0, 1);
+  IPAddress _sn = IPAddress(255, 255, 255, 0);
+  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
   if (!wifiManager.autoConnect("WIFI_AUT", "12345678")) {
     Serial.println("Falha ao conectar e atingir o tempo limite");
     ESP.restart();
@@ -289,32 +293,32 @@ void loop() {
     gravaLog(" " + hora_ntp + " - Configurações da Central ", logtxt, 2);
     servidor      = root["servidor"];
     serv = String(servidor);
-    gravaLog(" " + hora_ntp + "   Servidor Banco de dados:   " + String(servidor), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   BD:   " + String(servidor), logtxt, 2);
 
     botao1.nomeInter  = root["int_1"];
     botao1.tipo     = root["tipo_1"];
     botao1.modelo     = root["sinal_1"];
-    gravaLog(" " + hora_ntp + "   Interruptor 1 : " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 1 : " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
 
     botao2.nomeInter  = root["int_2"];
     botao2.tipo     = root["tipo_2"];
     botao2.modelo     = root["sinal_2"];
-    gravaLog(" " + hora_ntp + "   Interruptor 2 : " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 2 : " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
 
     botao3.nomeInter  = root["int_3"];
     botao3.tipo     = root["tipo_3"];
     botao3.modelo     = root["sinal_3"];
-    gravaLog(" " + hora_ntp + "   Interruptor 3 : " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 3 : " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
 
     botao4.nomeInter  = root["int_4"];
     botao4.tipo     = root["tipo_4"];
     botao4.modelo     = root["sinal_4"];
-    gravaLog(" " + hora_ntp + "   Interruptor 4 : " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 4 : " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
 
     botao5.nomeInter  = root["int_5"];
     botao5.tipo     = root["tipo_5"];
     botao5.modelo     = root["sinal_5"];
-    gravaLog(" " + hora_ntp + "   Interruptor 5 : " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 5 : " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
 
     conslog   = root["log"];
     logtxt = String(conslog);
@@ -341,8 +345,8 @@ void loop() {
     if (ESP_BLUT.available())
   {
     char incoming = ESP_BLUT.read(); //Read what we recevive
-    Serial.print(" Comando RF:"); Serial.println(incoming);
-	gravaLog(" " + hora_ntp + " - Comando RF:  "+incoming, logtxt, 1);
+    Serial.print(" RF:"); Serial.println(incoming);
+	gravaLog(" " + hora_ntp + " - RF:  "+incoming, logtxt, 1);
   }
   
   /*
@@ -351,7 +355,7 @@ void loop() {
   if ( digitalRead(PIN_AP) == LOW )
   {
 
-    gravaLog(" " + hora_ntp + " - Entrando em modo 'AP' e apagando configurações WIFI ", logtxt, 1);
+    gravaLog(" " + hora_ntp + " - Modo AP apagando configurações WIFI ", logtxt, 1);
     /*
     	Apagando dados de conexão WIFI da central
     */
@@ -377,7 +381,7 @@ void loop() {
   {
     if (digitalRead(botao1.entrada) == s_tipo_1.toInt())
     {
-      if (nContar == 0)Serial.println("\n"); Serial.println("\n Entrada 1 - Modo pulso... ");
+      if (nContar == 0)Serial.println("\n"); Serial.println("\n E1 Pulso");
       while ((digitalRead(botao1.entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -395,11 +399,18 @@ void loop() {
     botao1.estado_atual = digitalRead(botao1.entrada);
     if (botao1.estado_atual != botao1.estado_antes )
     {
-      if (nContar == 0)Serial.println(" Entrada 1 - Modo interruptor... ");
+      if (nContar == 0)Serial.println(" E1 Inter");
       botao1.estado_antes = botao1.estado_atual;
       botao1.contador = 3;
       //Serial.print(botao1.contador, DEC);
     }
+  } else if (s_modelo_1 == "pir")
+  {
+    botao1.estado_atual = digitalRead(botao1.entrada);
+    if(botao1.estado_atual == true)
+    {
+      Serial.println(" Movimento Detectado...");
+      }
   }
   if ((botao1.contador >= 2) && (botao1.contador <= 9))
   {
@@ -444,7 +455,7 @@ void loop() {
   {
     if (digitalRead(botao2.entrada) == s_tipo_2.toInt())
     {
-      if (nContar == 0)Serial.println(" Entrada 2 - Modo pulso... ");
+      if (nContar == 0)Serial.println(" E2 Pulso");
       while ((digitalRead(botao2.entrada) == s_tipo_2.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -461,7 +472,7 @@ void loop() {
     botao2.estado_atual = digitalRead(botao2.entrada);
     if (botao2.estado_atual != botao2.estado_antes )
     {
-      if (nContar == 0)Serial.println(" Entrada 2 - Modo interruptor... ");
+      if (nContar == 0)Serial.println(" E2 Inter ");
       botao2.estado_antes = botao2.estado_atual;
       botao2.contador = 3;
       //Serial.print(botao2.contador, DEC);
@@ -505,7 +516,7 @@ void loop() {
   {
     if (digitalRead(botao3.entrada) == s_tipo_3.toInt())
     {
-      if (nContar == 0)Serial.println(" Entrada 3 - Modo pulso... ");
+      if (nContar == 0)Serial.println(" E3 Pulso");
       while ((digitalRead(botao3.entrada) == s_tipo_3.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -522,7 +533,7 @@ void loop() {
     botao3.estado_atual = digitalRead(botao3.entrada);
     if (botao3.estado_atual != botao3.estado_antes )
     {
-      if (nContar == 0)Serial.print(" Entrada 3 - Modo interruptor... ");
+      if (nContar == 0)Serial.print(" E3 Inter");
       botao3.estado_antes = botao3.estado_atual;
       botao3.contador = 3;
       //Serial.print(botao3.contador, DEC);
@@ -565,7 +576,7 @@ void loop() {
   {
     if (digitalRead(botao4.entrada) == s_tipo_4.toInt())
     {
-      if (nContar == 0)Serial.println("\n"); Serial.println("\n Entrada 4 - Modo pulso... ");
+      if (nContar == 0)Serial.println("\n"); Serial.println("\n E4 Pulso");
       while ((digitalRead(botao4.entrada) == s_tipo_4.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -583,7 +594,7 @@ void loop() {
     botao4.estado_atual = digitalRead(botao4.entrada);
     if (botao4.estado_atual != botao4.estado_antes )
     {
-      if (nContar == 0)Serial.println(" Entrada 4 - Modo interruptor... ");
+      if (nContar == 0)Serial.println(" E4 Inter");
       botao4.estado_antes = botao4.estado_atual;
       botao4.contador = 3;
       //Serial.print(botao4.contador, DEC);
@@ -624,7 +635,7 @@ void loop() {
   {
     if (digitalRead(botao5.entrada) == s_tipo_5.toInt())
     {
-      if (nContar == 0)Serial.println("\n"); Serial.println("\n Entrada 5 - Modo pulso... ");
+      if (nContar == 0)Serial.println("\n"); Serial.println("\n E5 Pulso");
       while ((digitalRead(botao5.entrada) == s_tipo_5.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -642,7 +653,7 @@ void loop() {
     botao5.estado_atual = digitalRead(botao5.entrada);
     if (botao5.estado_atual != botao5.estado_antes )
     {
-      if (nContar == 0)Serial.println(" Entrada 5 - Modo interruptor... ");
+      if (nContar == 0)Serial.println(" E5 Interr");
       botao5.estado_antes = botao5.estado_atual;
       botao5.contador = 3;
       //Serial.print(botao4.contador, DEC);
@@ -683,7 +694,7 @@ void loop() {
       || ((botao4.contador >= 30) && (botao4.contador <= 50)) 
       || ((botao5.contador >= 30) && (botao5.contador <= 50)) )
   {
-    gravaLog(" " + hora_ntp + "\n - DESLIGANDO TODOS OS RELES", logtxt, 2);
+    gravaLog(" " + hora_ntp + "\n - DESL. RELES", logtxt, 2);
     acionaPorta(botao1.rele, "", "desl");
     botao1.estado = false;
     acionaPorta(botao2.rele, "", "desl");
@@ -692,10 +703,10 @@ void loop() {
     botao3.estado = false;
     acionaPorta(botao4.rele, "", "desl");
     botao4.estado = false;
-	acionaPorta(botao5.rele, "", "desl");
+	  acionaPorta(botao5.rele, "", "desl");
     botao5.estado = false;
     botao5.contador = 0;
-	botao4.contador = 0;
+	  botao4.contador = 0;
     botao3.contador = 0;
     botao2.contador = 0;
     botao1.contador = 0;
@@ -716,7 +727,7 @@ void loop() {
     	EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA - CHAMADA HTTP EX: HTTP://IP_HOST/?porta=20&acao=desligar&central=IP_HOST
     */
     String stringUrl = URL;
-    gravaLog(" " + hora_ntp + " - Recebido via GET : " + String(URL), logtxt, 4);
+    gravaLog(" " + hora_ntp + " - " + String(URL), logtxt, 4);
     URL = "";
     String requisicao = stringUrl.substring(6, 11);
     if (requisicao == "porta") {
@@ -770,7 +781,7 @@ void loop() {
     */
     if (requisicao == "00000")
     {
-      gravaLog(" " + hora_ntp + " - *** Central reiniciada pela pagina WEB ****", logtxt, 1);
+      gravaLog(" " + hora_ntp + " - Central reiniciada p/ WEB", logtxt, 1);
       delay(1000);
       ESP.restart();
     }
@@ -789,7 +800,7 @@ void loop() {
     int valorMQ_Novo = stringUrl.substring(22, 24).toInt();
     if (codidoExec == "00011")
     {
-      gravaLog(" " + hora_ntp + " - Novo valor de leitura do sensor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
+      gravaLog(" " + hora_ntp + " - Valor do sensor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
       EEPROM.begin(64);
       EEPROM.write(MEM_EEPROM_MQ2, byte(valorMQ_Novo));
       EEPROM.commit();
@@ -810,7 +821,7 @@ void loop() {
       stringUrl = "";
       int final_s = i.indexOf("HTTP/1.1");
       stringUrl = i.substring(0, final_s - 1);
-      gravaLog(" " + hora_ntp + " - Novos parâmetros I/O gravado na Central", logtxt, 2);
+      gravaLog(" " + hora_ntp + " - Novos parâmetros da Central", logtxt, 2);
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl) + 
 	  "\",\"int_5\":\"" + quebraString("int_5", stringUrl) +"\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl) + "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) +"\",\"tipo_5\":\"" + quebraString("tipo_5", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl) + "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl) + "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) +"\",\"sinal_5\":\"" + quebraString("sinal_5", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\",\"senha_alarme\":\"" + quebraString("senhaAlarme", stringUrl) + "\"}", "param.txt");
       cont_ip_banco = 0;
@@ -835,7 +846,7 @@ void loop() {
       //SPIFFS.remove("/param.txt");
       deletarArquivo("/param.txt");
       criarArquivo("/param.txt");
-      gravaLog(" " + hora_ntp + " - Configuração minima gravada na central", logtxt, 3);
+      gravaLog(" " + hora_ntp + " - Configuração minima ", logtxt, 3);
       gravarArquivo("{\"servidor\":\""+String(ipHost)+"\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"int_5\":\"P5\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"tipo_5\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"sinal_5\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\",\"senha_alarme\":\"4\"}", "param.txt");
       closeFS();
     }
@@ -997,12 +1008,12 @@ void loop() {
       String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
       if (CO == "2147483647") CO = "0";
       contarParaGravar1++;
-      gravaLog(" " + hora_ntp + " - Sensor MQ2 = Analogico: " + String(sensorMq2) + " GLP:" + GLP + "ppm | " + "CO:" + CO + "ppm | " + "FUMAÇA:" + FUMACA + "ppm | " + "Leituras: " + contarParaGravar1, logtxt, 4);
+      gravaLog(" " + hora_ntp + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " | " + "CO:" + CO + " | " + "FUMAÇA:" + FUMACA + "ppm | " + "L: " + contarParaGravar1, logtxt, 4);
     } else {
       //Gravando log de erro na central.
       for (int i = 0; i <= 0 ; i++ )
       {
-        gravaLog(" " + hora_ntp + " - ERRO 0103 - Erro na leitura do sensor de Gás", logtxt, 1);
+        gravaLog(" " + hora_ntp + " - ERRO 0103 - Sensor MQ-2", logtxt, 1);
         GLP = "0";
       }
     }
@@ -1041,7 +1052,7 @@ void loop() {
       buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
       gravarBanco(buff);
     } else {
-      gravaLog(" " + hora_ntp + " - ERRO 0109 - Erro na leitura dos valores do sensor temperatua e umidade", logtxt, 1);
+      gravaLog(" " + hora_ntp + " - ERRO 0109 - Sensor temp. umid.", logtxt, 1);
       t = 0;
       temperatura = 0;
       umidade = 0;

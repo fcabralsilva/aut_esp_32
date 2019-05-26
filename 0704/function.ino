@@ -160,7 +160,7 @@ String teste_conexao(){
 		int r = client.connect(servidor, portaServidor);
 		if(r == 0)
 		{
-			gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor WEB ou Banco de Dados Desconectado", logtxt, 1);
+			gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
 			retorno = "ERRO_SERVIDOR_DESC";
 		}else if(r == 1)
 		{
@@ -178,12 +178,12 @@ void gravarBanco (String buffer){
 	WiFiClient client = server.available();
 	if(WiFi.status() != WL_CONNECTED)
 	{
-		gravaLog(" "+hora_ntp + " - ERRO 0105 - Não foi possivel conectar ao servidor WEB ou banco de dados, reiniciando a central!", logtxt, 1);
+		gravaLog(" "+hora_ntp + " - ERRO 0105 - Impossivel conectar ao servidor, reiniciando a central!", logtxt, 1);
 		WiFi.reconnect();
 		if(WiFi.status() != WL_CONNECTED){
 			pisca_led(LED_VERDE,false);
 			pisca_led(LED_VERMELHO,true);
-			gravaLog(" "+hora_ntp + " - Falha ao conectar ao WIFI e atingir o tempo limite", logtxt, 1);
+			gravaLog(" "+hora_ntp + " - Falha no WIFI e atingir o tempo limite", logtxt, 1);
 			//ESP.restart();
 			delay(1000);
 		} 
@@ -193,11 +193,11 @@ void gravarBanco (String buffer){
 	{
 		//if (client.connect(servidor, 80)) {
 		client.println("GET /web/gravar.php?"+buffer);
-		gravaLog(" "+hora_ntp + " - Gravando no banco de dados: "+buffer, logtxt, 4);
+		gravaLog(" "+hora_ntp + " - BD: "+buffer, logtxt, 4);
 		client.println();
 		buffer = "";
 	} else {
-		gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor WEB ou Banco de Dados Desconectado...:", logtxt, 1);
+		gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
 		buffer = "";
 	}
 	client.flush();
@@ -360,7 +360,7 @@ void gravarArquivo(String msg, String arq) {
 			deletarArquivo("/log.txt");
 			criarArquivo("/log.txt"); 
 			delay(5);
-			gravaLog(" "+hora_ntp + " - Log foi deletado por estar grande demais! ", logtxt, 1);
+			gravaLog(" "+hora_ntp + " - Log deletado! ", logtxt, 1);
 		}
 		if(!logg){
 			//Gravando log de erro na central.
@@ -379,7 +379,7 @@ void gravarArquivo(String msg, String arq) {
 			gravaLog(" "+hora_ntp + " - ERRO 0106 - Erro ao abrir arquivo "+arq, logtxt, 1);
 		} else {
 			param1.println(msg);
-			gravaLog(" "+hora_ntp + " - Gravando novos paramentos: "+msg, logtxt, 1);
+			gravaLog(" "+hora_ntp + " - Gravando: "+msg, logtxt, 1);
 		}
 		param1.close();
 	}
@@ -389,7 +389,7 @@ String lerArquivo() {
 	String buff;
 	File ARQUIVO = SPIFFS.open("/log.txt","r");
 	int tamanhoLog = ARQUIVO.size(); // verificar tamanho do arquivo
-	buff = "Tamanho do log da central: "+String(tamanhoLog)+"<br />"; 
+	buff = "Log : "+String(tamanhoLog)+"<br />"; 
 	while(ARQUIVO.available()) {
 		String line = ARQUIVO.readStringUntil('\n');
 		buff += line+"<br />";
@@ -400,7 +400,6 @@ String lerArquivo() {
 String lerArquivoParam(void) {
 	String buff;
 	File ARQUIVO = SPIFFS.open("/param.txt","r");
-	//Serial.println("Lendo Parametros da central...");
 	while(ARQUIVO.available()) {
 		String line = ARQUIVO.readStringUntil('\n');
 		buff += line;
@@ -415,7 +414,7 @@ void openFS(){
 	//Abre o sistema de arquivos
 	SPIFFS.begin(true);
 	if(!SPIFFS.begin()){
-		gravaLog(" "+hora_ntp + " - ERRO 0107 - Erro ao abrir sistema de arquivo interno da central! ", logtxt, 1);
+		gravaLog(" "+hora_ntp + " - ERRO 0107 - Erro ao abrir sistema de arquivo", logtxt, 1);
 	} else {
 		gravaLog(" "+hora_ntp + " - Sistema de arquivos aberto com sucesso!", logtxt, 4);
 	}
@@ -424,7 +423,6 @@ void openFS(){
 
 //callback que indica que o ESP entrou no modo AP
 void configModeCallback (WiFiManager *myWiFiManager) {  
-	//  Serial.println("Entered config mode");
 	Serial.println(" Entrou no modo de configuração ");
 	Serial.println(WiFi.softAPIP()); //imprime o IP do AP
 	Serial.println(myWiFiManager->getConfigPortalSSID()); //imprime o SSID criado da rede

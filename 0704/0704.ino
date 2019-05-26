@@ -94,7 +94,7 @@ struct botao5 {
 //---------------------------------------
 //    INICIANDO VARIAVEIS
 //---------------------------------------
-String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf;
+String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 3, i_sensor_alarme = 17, i_sirene_alarme = 18;
@@ -264,6 +264,7 @@ void setup() {
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   gravarArquivo(" \n\n ******************************* \n *** INICIANDO CENTRAL *** \n *******************************\n " + VERSAO, "log.txt");
+  //closeFS();
 }
 
 void loop() {
@@ -278,6 +279,7 @@ void loop() {
   hora_ntp   = dayStamp + " " + timeClient.getFormattedTime();
   while (cont_ip_banco < 1)
   {
+    openFS();
     //Gravando no log o reinicio da central
     StaticJsonDocument<700> doc;
     json = lerArquivoParam().c_str();
@@ -328,7 +330,6 @@ void loop() {
     gravaLog(" " + hora_ntp + "   Grava Log : " + String(conslog) + " Nivel: " + String(nivelLog) + " Horario de Verão: " + String(verao), logtxt, 1);
     //gravaLog(" " + hora_ntp + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
     Serial.println("");
-
     cont_ip_banco++;
   }
   /*
@@ -813,7 +814,6 @@ void loop() {
     */
     if (codidoExec == "00012")
     {
-      //SPIFFS.begin();
       openFS();
       SPIFFS.remove("/param.txt");
       criarArquivo("/param.txt");
@@ -950,6 +950,10 @@ void loop() {
     buf += "<h4>Parâmetros Gerais</h4>";
     buf += "<form class=\"form-group\" action=\"?00012\"><table class=\"table-responsive\"><input type=\"hidden\" name=\"cod\" value=\"00012\">";
     buf += "<tr><td ><label for=\"inputEmail4\">Servidor</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + serv + "\"></td></tr>";
+    buf += "<tr><td ><label for=\"inputEmail4\">IP Fixo</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"ipFixo\" value=\"" + IP_FIXO + "\"></td></tr>";
+    
+    buf += "<tr><td ><label for=\"inputEmail4\">Gateway</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + GATEWAY + "\"></td></tr>";
+    buf += "<tr><td ><label for=\"inputEmail4\">Mascara</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + MASCARA_IP + "\"></td></tr>";
     buf += "<tr>";
     buf += "<td><label for=\"inputEmail4\">Interruptor 1</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_1\" value=\"" + String(botao1.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_1\"><option value=\"0\" " + selectedHTNL(botao1.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao1.tipo, "1") + "> Positivo</option></select></td>";

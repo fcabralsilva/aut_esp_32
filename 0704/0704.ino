@@ -1,4 +1,4 @@
-String VERSAO = "V0710 - 25/05/2019";
+String VERSAO = "V0711 - 26/05/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -101,7 +101,7 @@ const int PIN_AP = 3, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
-unsigned long time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 10000;
+unsigned long time1sec, time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
 IPAddress ipHost;
 WiFiUDP ntpUDP;
 int16_t utc = -3; //UTC -3:00 Brazil
@@ -193,10 +193,10 @@ void setup() {
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-  IPAddress _ip = IPAddress(192, 168, 0, 20);
-  IPAddress _gw = IPAddress(192, 168, 0, 1);
-  IPAddress _sn = IPAddress(255, 255, 255, 0);
-  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
+//  IPAddress _ip = IPAddress(192, 168, 0, 21);
+//  IPAddress _gw = IPAddress(192, 168, 0, 1);
+//  IPAddress _sn = IPAddress(255, 255, 255, 0);
+//  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
   if (!wifiManager.autoConnect("WIFI_AUT", "12345678")) {
     Serial.println("Falha ao conectar e atingir o tempo limite");
     ESP.restart();
@@ -272,11 +272,7 @@ void loop() {
   WiFiManager wifiManager;
   WiFiClient client = server.available();
   pisca_led(LED_VERDE, true);
-  timeClient.update();
-  formattedDate = timeClient.getFormattedDate();
-  int splitT = formattedDate.indexOf("T");
-  dayStamp = formattedDate.substring(0, splitT);
-  hora_ntp   = dayStamp + " " + timeClient.getFormattedTime();
+  relogio();
   while (cont_ip_banco < 1)
   {
     openFS();
@@ -286,7 +282,7 @@ void loop() {
     DeserializationError error = deserializeJson(doc, json);
     if (error)
     {
-      gravaLog(" " + hora_ntp + " - ERRO 0101 - Falha ao desenraizar o arquivo json: ", logtxt, 1);
+      gravaLog(" " + hora_ntp + " - ERRO 0101 - Arquivo json: ", logtxt, 1);
       Serial.println(error.c_str());
       cont_ip_banco++;
       return;
@@ -300,34 +296,34 @@ void loop() {
     botao1.nomeInter  = root["int_1"];
     botao1.tipo     = root["tipo_1"];
     botao1.modelo     = root["sinal_1"];
-    gravaLog(" " + hora_ntp + "   Int 1 : " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 1: " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
 
     botao2.nomeInter  = root["int_2"];
     botao2.tipo     = root["tipo_2"];
     botao2.modelo     = root["sinal_2"];
-    gravaLog(" " + hora_ntp + "   Int 2 : " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 2: " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
 
     botao3.nomeInter  = root["int_3"];
     botao3.tipo     = root["tipo_3"];
     botao3.modelo     = root["sinal_3"];
-    gravaLog(" " + hora_ntp + "   Int 3 : " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 3: " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
 
     botao4.nomeInter  = root["int_4"];
     botao4.tipo     = root["tipo_4"];
     botao4.modelo     = root["sinal_4"];
-    gravaLog(" " + hora_ntp + "   Int 4 : " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 4: " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
 
     botao5.nomeInter  = root["int_5"];
     botao5.tipo     = root["tipo_5"];
     botao5.modelo     = root["sinal_5"];
-    gravaLog(" " + hora_ntp + "   Int 5 : " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
+    gravaLog(" " + hora_ntp + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
 
     conslog   = root["log"];
     logtxt = String(conslog);
     nivelLog = root["nivel"];
     verao = root["verao"];
     s_senha_alarme = root["senha_alarme"];
-    gravaLog(" " + hora_ntp + "   Grava Log : " + String(conslog) + " Nivel: " + String(nivelLog) + " Horario de Verão: " + String(verao), logtxt, 1);
+    gravaLog(" " + hora_ntp + "   Log ?: " + String(conslog) + " N: " + String(nivelLog), logtxt, 1);
     //gravaLog(" " + hora_ntp + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
     Serial.println("");
     cont_ip_banco++;
@@ -801,7 +797,7 @@ void loop() {
     int valorMQ_Novo = stringUrl.substring(22, 24).toInt();
     if (codidoExec == "00011")
     {
-      gravaLog(" " + hora_ntp + " - Valor do sensor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
+      gravaLog(" " + hora_ntp + " - Valor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
       EEPROM.begin(64);
       EEPROM.write(MEM_EEPROM_MQ2, byte(valorMQ_Novo));
       EEPROM.commit();
@@ -886,7 +882,7 @@ void loop() {
     /*HEAD*/
     buf += "<head><meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"> <link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\">";
     /*STYLE CSS*/
-    buf += "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px }</style>";
+    buf += "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px } #collapseExample {font-size:10px}</style>";
     /*HEAD_END*/
     buf += "<title>Central Automação</title></head><body>";
     /* DIV CONTAINER*/
@@ -1004,26 +1000,26 @@ void loop() {
   //---------------------------------------
   if (millis() >= timeMq2 + (timeMq2Param * 1)) {
     sensorMq2 = analogRead(PIN_MQ2);
-    if (sensorMq2 < 4000) {
+   // if (sensorMq2 < 5000) {
       GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
-      if (GLP == "2147483647") GLP = "0";
+      //if (GLP == "2147483647") GLP = "0";
       FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
-      if (FUMACA == "2147483647") FUMACA = "0";
+      //if (FUMACA == "2147483647") FUMACA = "0";
       String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
-      if (CO == "2147483647") CO = "0";
+      //if (CO == "2147483647") CO = "0";
       contarParaGravar1++;
-      gravaLog(" " + hora_ntp + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " | " + "CO:" + CO + " | " + "FUMAÇA:" + FUMACA + "ppm | " + "L: " + contarParaGravar1, logtxt, 4);
-    } else {
-      //Gravando log de erro na central.
-      for (int i = 0; i <= 0 ; i++ )
-      {
-        gravaLog(" " + hora_ntp + " - ERRO 0103 - Sensor MQ-2", logtxt, 1);
-        GLP = "0";
-      }
-    }
+      gravaLog(" " + hora_ntp + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
+//    } else {
+//      //Gravando log de erro na central.
+//      for (int i = 0; i <= 0 ; i++ )
+//      {
+//        gravaLog(" " + hora_ntp + " - ERRO 0103 - Sensor MQ-2", logtxt, 1);
+//        GLP = "0";
+//      }
+//    }
     timeMq2 = millis();
     buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
-    if (GLP >= LIMITE_MQ2)
+    if (GLP > LIMITE_MQ2)
     {
       sirene(true);
       pisca_led(LED_VERDE, false);
@@ -1056,7 +1052,7 @@ void loop() {
       buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
       gravarBanco(buff);
     } else {
-      gravaLog(" " + hora_ntp + " - ERRO 0109 - Sensor temp. umid.", logtxt, 1);
+      gravaLog(" " + hora_ntp + " - ERRO 0109 - Sensor DHT", logtxt, 1);
       t = 0;
       temperatura = 0;
       umidade = 0;

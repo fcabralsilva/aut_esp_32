@@ -1,4 +1,4 @@
-String VERSAO = "V0711 - 26/05/2019";
+String VERSAO = "V0712 - 26/05/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -951,18 +951,27 @@ void loop() {
     buf += "<tr><td ><label for=\"inputEmail4\">Gateway</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + GATEWAY + "\"></td></tr>";
     buf += "<tr><td ><label for=\"inputEmail4\">Mascara</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + MASCARA_IP + "\"></td></tr>";
     buf += "<tr>";
+    
     buf += "<td><label for=\"inputEmail4\">Interruptor 1</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_1\" value=\"" + String(botao1.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_1\"><option value=\"0\" " + selectedHTNL(botao1.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao1.tipo, "1") + "> Positivo</option></select></td>";
-    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_1\"><option value=\"pulso\" " + selectedHTNL(botao1.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao1.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao1.modelo, "pir") + ">PIR</option></select></td></tr>";
+    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_1\"><option value=\"pulso\" " + selectedHTNL(botao1.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao1.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao1.modelo, "pir") + ">PIR</option></select></td>";
+    buf += "<td><button class='btn btn-primary' type='button' data-toggle='collapse' data-target='#collapse1' aria-expanded='false' aria-controls='collapse1'>Agendar</button></td></tr>";
+    buf += "<tr><td colspan='4'><div class='collapse' id='collapse1'> <div class='card card-body'> ";
+    buf += "<br><br><br>";
+    buf += "</div> </div><td></tr>";
+    
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 2</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_2\" value=\"" + String(botao2.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_2\"><option value=\"0\" " + selectedHTNL(botao2.tipo, "0") + " > Negativo</option><option value=\"1\" " + selectedHTNL(botao2.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_2\"><option value=\"pulso\" " + selectedHTNL(botao2.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao2.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao2.modelo, "pir") + ">PIR</option></select></td></tr>";
+    
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 3</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_3\" value=\"" + String(botao3.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_3\"><option value=\"0\" " + selectedHTNL(botao3.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao3.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_3\"><option value=\"pulso\" " + selectedHTNL(botao3.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao3.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao3.modelo, "pir") + ">PIR</option></select></td></tr>";
+    
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 4</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_4\" value=\"" + String(botao4.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_4\"><option value=\"0\" " + selectedHTNL(botao4.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao4.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_4\"><option value=\"pulso\" " + selectedHTNL(botao4.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao4.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao4.modelo, "pir") + ">PIR</option></select></td></tr>";
+    
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 5</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_5\" value=\"" + String(botao5.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_5\"><option value=\"0\" " + selectedHTNL(botao5.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao5.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_5\"><option value=\"pulso\" " + selectedHTNL(botao5.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao5.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao5.modelo, "pir") + ">PIR</option></select></td></tr>";

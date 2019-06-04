@@ -1,4 +1,4 @@
-String VERSAO = "V0712 - 26/05/2019";
+String VERSAO = "V0713 - 03/06/2019";
 //---------------------------------------
 //    INCLUINDO BIBLIOTECAS
 //---------------------------------------
@@ -45,6 +45,7 @@ String VERSAO = "V0712 - 26/05/2019";
 #define LED_AZUL              2
 #define LED_VERDE             15
 #define LED_VERMELHO          4
+#define PIR_1                 36
 long milis = 0;        // último momento que o LED foi atualizado
 long interval = 250;           // tempo de transição entre estados (milisegundos)
 //---------------------------------------
@@ -97,11 +98,11 @@ struct botao5 {
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
-const int PIN_AP = 3, i_sensor_alarme = 17, i_sirene_alarme = 18;
+const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, REINICIO_CENTRAL, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
-unsigned long time1sec, time3, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
+unsigned long time1sec, time3, TEMP_4,PIR_1_INTRVL =300, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
 IPAddress ipHost;
 WiFiUDP ntpUDP;
 int16_t utc = -3; //UTC -3:00 Brazil
@@ -127,6 +128,8 @@ String formattedDate;
 String dayStamp;
 String timeStamp;
 boolean b_status_alarme = 0;
+boolean MV_DETC = false;
+int MV_DETC_CONTAR = 0;
 //---------------------------------------
 //    INSTANCIANDO CLASSES
 //---------------------------------------
@@ -145,6 +148,7 @@ void setup() {
   mySwitch.enableReceive(RF_RECEIVER);
   delay(2000);
   pinMode(PIN_AP, INPUT_PULLUP);
+  pinMode(PIR_1, INPUT_PULLUP);
 
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
@@ -392,7 +396,6 @@ void loop() {
     }
   } else if (s_modelo_1 == "interruptor")
   {
-
     botao1.estado_atual = digitalRead(botao1.entrada);
     if (botao1.estado_atual != botao1.estado_antes )
     {
@@ -401,13 +404,45 @@ void loop() {
       botao1.contador = 3;
       //Serial.print(botao1.contador, DEC);
     }
+    /*  SENSOR DE PRESENÇA  */
+    boolean PIR_1_STATUS = digitalRead(PIR_1);
+    if(PIR_1_STATUS)
+    {
+      Serial.print(".");
+      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL)); 
+      delay(80);
+      MV_DETC = true;
+      MV_DETC_CONTAR = 0;     
+    }
+    if(MV_DETC == true)
+      {
+        if (millis() - TEMP_4 > 1000) 
+        {
+          TEMP_4 = millis();
+          MV_DETC_CONTAR++;
+          Serial.println( " "+String(MV_DETC_CONTAR)+"s");
+          if(MV_DETC_CONTAR == PIR_1_INTRVL)
+          {
+            MV_DETC_CONTAR = 0;
+            MV_DETC = false;
+            if(botao1.estado_antes == true)
+            {
+              //Desligar lampada
+              botao1.estado_antes = botao1.estado_atual;
+              botao1.contador = 3;
+            }
+          }
+        }
+     }
   } else if (s_modelo_1 == "pir")
   {
-    botao1.estado_atual = digitalRead(botao1.entrada);
-    if(botao1.estado_atual == true)
-    {
-      Serial.println(" Movimento Detectado...");
-      }
+//    boolean PIR_1_STATUS = digitalRead(PIR_1);
+//    if(PIR_1_STATUS)
+//    {
+//      Serial.println(" Mov. Detec.");
+//      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL)); 
+//      delay(80);     
+//    }
   }
   if ((botao1.contador >= 2) && (botao1.contador <= 9))
   {
